@@ -1,6 +1,7 @@
 import { usernameToPath } from "@/lib/utils/usernameToPath";
 import Link from "next/link";
 import Image from "next/image";
+import TagList from "./TagList";
 
 export type ArticlePreviewProps = {
   author: string;
@@ -26,13 +27,7 @@ export default function ArticlePreview(props: ArticlePreviewProps) {
         <h1>{header}</h1>
         <p>{description}</p>
         <span>Read more...</span>
-        <ul className="tag-list">
-          {tags.map((tag) => (
-            <li key={tag} className="tag-default tag-pill tag-outline">
-              {tag}
-            </li>
-          ))}
-        </ul>
+        <TagList tags={tags} />
       </a>
     </div>
   );
