@@ -1,5 +1,6 @@
 "use client";
 
+import ErrorMessages from "@/components/ErrorMessages";
 import Link from "next/link";
 
 export default function Page() {
@@ -12,24 +13,12 @@ export default function Page() {
             <p className="text-xs-center">
               <Link href="/login">Have an account?</Link>
             </p>
-
             <ErrorMessages messages={["That email is already taken"]} />
             <AuthForm />
           </div>
         </div>
       </div>
     </div>
-  );
-}
-
-function ErrorMessages(props: { messages: string[] }) {
-  const { messages } = props;
-  return (
-    <ul className="error-messages">
-      {messages.map((message, index) => (
-        <li key={index}>{message}</li>
-      ))}
-    </ul>
   );
 }
 
