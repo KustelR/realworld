@@ -29,7 +29,7 @@ export default async function Header() {
         {username && (
           <>
             <NavItem>
-              <Link href="editor" className="ion-compose">
+              <Link href="/editor" className="ion-compose">
                 New Article
               </Link>
             </NavItem>
