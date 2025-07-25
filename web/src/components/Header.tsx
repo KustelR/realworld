@@ -4,6 +4,7 @@ import { usernameToPath } from "@/lib/utils/usernameToPath";
 
 async function getUser(auth: boolean = false) {
   // Simulate fetching user data
+  if (!auth) return { username: undefined };
   return { username: "John Dou" };
 }
 
@@ -28,10 +29,14 @@ export default async function Header() {
         {username && (
           <>
             <NavItem>
-              <Link href="editor" className="ion-compose"></Link>New Article
+              <Link href="editor" className="ion-compose">
+                New Article
+              </Link>
             </NavItem>
             <NavItem>
-              <Link href="/settings" className="ion-gear-a"></Link>Settings
+              <Link href="/settings" className="ion-gear-a">
+                Settings
+              </Link>
             </NavItem>
             <NavItem>
               <Link
