@@ -4,6 +4,7 @@ import { usernameToPath } from "@/lib/utils/usernameToPath";
 import ArticlePreview, {
   ArticlePreviewProps,
 } from "@/components/ArticlePreview";
+import FeedToggle from "@/components/FeedToggle";
 
 async function getArticles(): Promise<ArticlePreviewProps[]> {
   return [
@@ -52,7 +53,13 @@ export default async function Home() {
       <div className="container page">
         <div className="row">
           <div className="col-md-9">
-            <FeedToggle />
+            <FeedToggle
+              active={0}
+              items={[
+                { name: "Your Feed", href: "" },
+                { name: "Global Feed", href: "" },
+              ]}
+            />
             {articles.map((article) => (
               <ArticlePreview key={article.header} {...article} />
             ))}
@@ -72,25 +79,6 @@ function Banner() {
         <h1 className="logo-font">conduit</h1>
         <p>A place to share your knowledge.</p>
       </div>
-    </div>
-  );
-}
-
-function FeedToggle() {
-  return (
-    <div className="feed-toggle">
-      <ul className="nav nav-pills outline-active">
-        <li className="nav-item">
-          <Link className="nav-link" href="">
-            Your Feed
-          </Link>
-        </li>
-        <li className="nav-item">
-          <Link className="nav-link active" href="">
-            Global Feed
-          </Link>
-        </li>
-      </ul>
     </div>
   );
 }
