@@ -39,7 +39,7 @@ export default async function Header() {
                 className="ion-person"
               >
                 <Image
-                  src={`https://placehold.co/32x32`}
+                  src="http://i.imgur.com/Qr71crq.jpg"
                   className="user-pic"
                   alt={username}
                   width={32}
