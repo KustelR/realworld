@@ -38,18 +38,18 @@ type LoginData = {
 };
 
 function LoginForm(props: { onSubmit: (data: LoginData) => void }) {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const data: LoginData = {
-      login: formData.get("login") as string,
-      password: formData.get("password") as string,
-    };
-    props.onSubmit(data);
-  };
-
   return (
-    <form onSubmit={handleSubmit}>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        const data: LoginData = {
+          login: formData.get("login") as string,
+          password: formData.get("password") as string,
+        };
+        props.onSubmit(data);
+      }}
+    >
       <fieldset className="form-group">
         <input
           className="form-control form-control-lg"
