@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { usernameToPath } from "@/lib/utils/usernameToPath";
 
 async function getUser(auth: boolean = false) {
   // Simulate fetching user data
@@ -68,8 +69,4 @@ function NavBarContainer(props: { children?: React.ReactNode }) {
 function NavItem(props: { children: React.ReactNode }) {
   const { children } = props;
   return <li className="nav-item">{children}</li>;
-}
-
-function usernameToPath(username: string): string {
-  return username.toLocaleLowerCase().replace(/ /g, "-");
 }
