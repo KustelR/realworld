@@ -1,10 +1,9 @@
 import datetime
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field
 
 import lib.db as db
 from utils import getSlug
-from schemas import Article, Author
+from schemas import Article, Author, ArticlePostBody, ArticlePutBody
 
 router = APIRouter()
 
@@ -28,35 +27,21 @@ async def read_articles(author: str = None, tag: str = None):
     }
 
 
-class PostingArticle(BaseModel):
-    title: str
-    description: str
-    body: str
-    tagList: list[str]
-
-class ArticlePostBody(BaseModel):
-    article: PostingArticle
-
 
 @router.post("/")
 async def create_article(body: ArticlePostBody):
-    article = body.article
-
-    newArticle = Article(
-        title=article.title,
-        description=article.description,
-        body=article.body,
-        tagList=article.tagList,
-        slug=getSlug(article.title),
-        createdAt=datetime.datetime.now().astimezone().isoformat(),
-        updatedAt=datetime.datetime.now().astimezone().isoformat(),
-        favoritesCount=0,
-        author= Author(
-            username="John Dow",
-            bio="",
-            image="",
-        )
+    article = body.article.model_dump()
+    article["slug"] = getSlug(article["title"])
+    article["author"] = Author(
+        username="Joe",
+        bio="",
+        image=""
     )
+    article["favoritesCount"] = 0
+    article["createdAt"] = datetime.datetime.now().astimezone().isoformat() 
+    article["updatedAt"] = datetime.datetime.now().astimezone().isoformat() 
+
+    newArticle = Article.model_validate(article);
     db.createArticle(newArticle)
 
     return {
@@ -75,17 +60,14 @@ async def read_article(slug: str):
         raise HTTPException(status_code=404, detail="Article not found")
     
 
-class PuttingArticle(BaseModel):
-    title: str | None = None
-    description: str | None = None
-    body: str | None = None
-
-class ArticlePutBody(BaseModel):
-    article: PuttingArticle
-
-
 @router.put("/{slug}")
 async def update_article(slug: str, body: ArticlePutBody):
     return {
         "article": db.updateArticle(slug, body.article)
     }
+
+
+@router.delete("/{slug}")
+async def delete_article(slug: str):
+    db.deleteArticle(slug);
+    return "success"
