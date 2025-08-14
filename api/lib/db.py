@@ -1,13 +1,22 @@
 import os
 import pymongo
 
-from schemas import Article, DatabaseArticle
+from lib.auth import generateAccessToken, getPasswordHash, verifyPassword
+from schemas import Article, DatabaseArticle, User
+
+MONGODB_CONNECTION = os.environ.get("MONGODB_CONNECTION")
+if not MONGODB_CONNECTION:
+    raise Exception("Specify mongodb connection string through `MONGODB_CONNECTION` environment variable")
 
 
-client = pymongo.MongoClient(os.environ.get("MONGODB_CONNECTION"))
+
+
+client = pymongo.MongoClient(os.getenv("MONGODB_CONNECTION"))
 exclude = {"_id": 0, "deleted": 0}
 db = client["realworld"]
 articlesCollection = db["articles"]
+passwordsCollection = db["passwords"]
+usersCollection = db["users"]
 
 print("Connected to MongoDB")
 
@@ -34,3 +43,29 @@ def updateArticle(slug: str, article: Article):
 
 def deleteArticle(slug: str):
     articlesCollection.delete_many({"slug": slug})
+
+
+def createUser(user: User):
+    hashed = getPasswordHash(user.password)
+    passwordsCollection.insert_one({"email": user.email, "password": hashed})
+
+    userPublic = user.model_dump()
+
+    del(userPublic["password"])
+    usersCollection.insert_one(userPublic.copy());
+
+    token = generateAccessToken(user.email)
+    userPublic["token"] = token
+
+    return {"user": userPublic}
+
+
+def authorizeUser(email: str, password: str):
+    saved = passwordsCollection.find_one({"email": email})
+    res = verifyPassword(password, saved["password"]);
+
+    return res
+
+
+def getUser(email: str):
+    return usersCollection.find_one({"email": email}, exclude)

@@ -38,3 +38,16 @@ class PostingArticle(BaseModel):
 class ArticlePostBody(BaseModel):
     article: PostingArticle
 
+
+class User(BaseModel):
+    username: str
+    email: str
+    password: str
+    image: str = ""
+    bio: str = ""
+
+class RegistrationBody(BaseModel):
+    user: User
+
+class AuthUser(User):
+    token: str
