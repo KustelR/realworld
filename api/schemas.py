@@ -39,12 +39,15 @@ class ArticlePostBody(BaseModel):
     article: PostingArticle
 
 
-class User(BaseModel):
-    username: str
+class UserDatabase(BaseModel):
     email: str
-    password: str
-    image: str = ""
+    username: str
     bio: str = ""
+    image: str = ""
+
+
+class User(UserDatabase):
+    password: str
 
 class RegistrationBody(BaseModel):
     user: User
