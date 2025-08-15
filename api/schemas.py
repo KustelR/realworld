@@ -51,3 +51,13 @@ class RegistrationBody(BaseModel):
 
 class AuthUser(User):
     token: str
+
+class UpdateUser(BaseModel):
+    username: str | None = None
+    email: str | None = None
+    password: str | None = None
+    image: str | None = None
+    bio: str | None = None
+
+class UpdateUserBody(BaseModel):
+    user: UpdateUser
