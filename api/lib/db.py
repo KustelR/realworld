@@ -4,6 +4,7 @@ import pymongo
 from lib.auth import generateAccessToken, getPasswordHash, verifyPassword
 from schemas import Article, DatabaseArticle, UpdateUser, User
 
+
 MONGODB_CONNECTION = os.environ.get("MONGODB_CONNECTION")
 if not MONGODB_CONNECTION:
     raise Exception("Specify mongodb connection string through `MONGODB_CONNECTION` environment variable")
@@ -18,16 +19,34 @@ articlesCollection = db["articles"]
 passwordsCollection = db["passwords"]
 usersCollection = db["users"]
 followCollection = db["follows"]
+favoritesCollection = db["favorites"]
 
 print("Connected to MongoDB")
 
 
-def readArticles():
-    return list(articlesCollection.find({"deleted": False}, exclude))
+def readArticles(whoAsked: str | None = None) -> list[dict[str, any]]:
+    articles: list[str, any] = list(articlesCollection.find({"deleted": False}, exclude))
+    for article in articles:
+        favorites = favoritesCollection.count_documents({"slug": article["slug"]})
+        article["favoritesCount"] = favorites
+
+        if whoAsked:
+            print(whoAsked, article["slug"], isFavorite(whoAsked, article["slug"]))
+            article["favorited"] = isFavorite(whoAsked, article["slug"])
+        else:
+            article["favorited"] = False
+    return articles
 
 
-def readArticle(slug: str):
-    return articlesCollection.find_one({"deleted": False, "slug": slug}, exclude)
+def readArticle(slug: str, whoAsked: str | None = None) -> dict[str, any] | None:
+    favorites = favoritesCollection.count_documents({"slug": slug})
+    entry = articlesCollection.find_one({"deleted": False, "slug": slug}, exclude)
+    entry["favoritesCount"] = favorites
+    if whoAsked:
+        entry["favorited"] = isFavorite(whoAsked, slug)
+    else:
+        entry["favorited"] = False
+    return entry
 
 
 def createArticle(article: Article):
@@ -39,7 +58,8 @@ def createArticle(article: Article):
 def updateArticle(slug: str, article: Article):
     new = {k: v for k,v in article.model_dump().items() if v is not None}
     articlesCollection.update_one({"slug": slug}, {"$set": new})
-    return article
+    result = readArticle(slug)
+    return result
 
 
 def deleteArticle(slug: str):
@@ -112,3 +132,41 @@ def unfollowUser(follower: str, following: str) -> dict[str, any]:
 
     followCollection.delete_one({"follower": followerId, "following": followingId})
     return getProfile(following, follower)
+
+
+def isFavorite(email: str, slug: str) -> bool:
+
+    uid = usersCollection.find_one({"email": email}, {"_id": 1})["_id"]
+    if not uid:
+        raise Exception("User not found")
+
+    article = readArticle(slug)
+    if not article:
+        raise Exception("Article not found")
+
+    entry = favoritesCollection.find_one({"u_id": uid, "slug": slug})
+    return entry is not None
+
+
+def favoriteArticle(email: str, slug: str) -> dict[str, any]:
+    uid = usersCollection.find_one({"email": email}, {"_id": 1})["_id"]
+    if not uid:
+        raise Exception("User not found")
+
+    if not readArticle(slug):
+        raise Exception("Article not found")
+
+    favoritesCollection.insert_one({"u_id": uid, "slug": slug})
+    return readArticle(slug, email)
+
+
+def unfavoriteArticle(email: str, slug: str) -> dict[str, any]:
+    uid = usersCollection.find_one({"email": email}, {"_id": 1})["_id"]
+    if not uid:
+        raise Exception("User not found")
+
+    if not readArticle(slug):
+        raise Exception("Article not found")
+
+    favoritesCollection.delete_one({"u_id": uid, "slug": slug})
+    return readArticle(slug, email)

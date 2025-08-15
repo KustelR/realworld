@@ -1,23 +1,6 @@
 from pydantic import BaseModel
 
-class Author(BaseModel):
-    username: str
-    bio: str
-    image: str
 
-class Article(BaseModel):
-    slug: str
-    title: str
-    description: str
-    body: str
-    tagList: list[str]
-    createdAt: str
-    updatedAt: str
-    favoritesCount: int
-    author: Author
-
-class DatabaseArticle(Article):
-    deleted: bool = False;
 
 class PuttingArticle(BaseModel):
     title: str | None = None
@@ -39,11 +22,14 @@ class ArticlePostBody(BaseModel):
     article: PostingArticle
 
 
-class UserDatabase(BaseModel):
-    email: str
+class UserPublic(BaseModel):
     username: str
     bio: str = ""
     image: str = ""
+
+
+class UserDatabase(UserPublic):
+    email: str
 
 
 class User(UserDatabase):
@@ -64,3 +50,17 @@ class UpdateUser(BaseModel):
 
 class UpdateUserBody(BaseModel):
     user: UpdateUser
+
+class Article(BaseModel):
+    slug: str
+    title: str
+    description: str
+    body: str
+    tagList: list[str]
+    createdAt: str
+    updatedAt: str
+    author: UserPublic
+
+
+class DatabaseArticle(Article):
+    deleted: bool = False;

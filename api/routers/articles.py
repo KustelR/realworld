@@ -1,17 +1,25 @@
 import datetime
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 
 import lib.db as db
-from utils import getSlug
-from schemas import Article, Author, ArticlePostBody, ArticlePutBody
+from utils import authentificateRequest, getSlug
+from schemas import Article, ArticlePostBody, ArticlePutBody, UserDatabase, UserPublic
 
 router = APIRouter()
 
 
 
 @router.get("/feed")
-async def read_feed():
-    articles = db.readArticles()
+async def read_feed(req: Request):
+
+
+    user: UserDatabase
+    try:
+        user = authentificateRequest(req)
+    except Exception as e:
+        raise HTTPException(401, f"Authentication failed: {str(e)}")
+
+    articles = db.readArticles(user.email)
     return {
         "articles": articles,
         "articlesCount": len(articles)
@@ -19,8 +27,15 @@ async def read_feed():
 
 
 @router.get("/")
-async def read_articles(author: str = None, tag: str = None):
-    articles = db.readArticles()
+async def read_articles(req: Request, author: str = None, tag: str = None):
+
+    user: UserDatabase | None
+    try:
+        user = authentificateRequest(req)
+    except Exception as e:
+        user = None
+
+    articles = db.readArticles(user.email if user else None)
     return {
         "articles": articles,
         "articlesCount": len(articles)
@@ -32,12 +47,11 @@ async def read_articles(author: str = None, tag: str = None):
 async def create_article(body: ArticlePostBody):
     article = body.article.model_dump()
     article["slug"] = getSlug(article["title"])
-    article["author"] = Author(
+    article["author"] = UserPublic(
         username="Joe",
         bio="",
         image=""
     )
-    article["favoritesCount"] = 0
     article["createdAt"] = datetime.datetime.now().astimezone().isoformat() 
     article["updatedAt"] = datetime.datetime.now().astimezone().isoformat() 
 
@@ -71,3 +85,44 @@ async def update_article(slug: str, body: ArticlePutBody):
 async def delete_article(slug: str):
     db.deleteArticle(slug);
     return "success"
+
+
+@router.post("/{slug}/favorite")
+async def favorite_article(slug: str, req: Request):
+    
+    user: UserDatabase
+    try:
+        user = authentificateRequest(req)
+    except Exception as e:
+        raise HTTPException(401, f"Authentication failed: {str(e)}")
+    
+    isFavorited = db.isFavorite(user.email, slug)
+    if isFavorited:
+        raise HTTPException(400, "Already favorited this article")
+    
+    favorited = db.favoriteArticle(user.email, slug)
+
+    return {
+        "article": favorited
+    }
+
+
+@router.delete("/{slug}/favorite")
+async def unfavorite_article(slug: str, req: Request):
+
+    user: UserDatabase
+    try:
+        user = authentificateRequest(req)
+    except Exception as e:
+        raise HTTPException(401, f"Authentication failed: {str(e)}")
+    
+    isFavorited = db.isFavorite(user.email, slug)
+    if not isFavorited:
+        raise HTTPException(400, "Not favorited this article")
+
+    unfavorited = db.unfavoriteArticle(user.email, slug)
+
+    return {
+        "article": unfavorited
+    }
+
