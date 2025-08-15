@@ -2,7 +2,7 @@ import os
 import pymongo
 
 from lib.auth import generateAccessToken, getPasswordHash, verifyPassword
-from schemas import Article, DatabaseArticle, User
+from schemas import Article, DatabaseArticle, UpdateUser, User
 
 MONGODB_CONNECTION = os.environ.get("MONGODB_CONNECTION")
 if not MONGODB_CONNECTION:
@@ -67,5 +67,16 @@ def authorizeUser(email: str, password: str):
     return res
 
 
-def getUser(email: str):
-    return usersCollection.find_one({"email": email}, exclude)
+def getUser(email: str) -> dict[str, any] | None:
+    user = usersCollection.find_one({"email": email}, exclude)
+    return user
+
+
+def updateUser(email: str, user: UpdateUser):
+    new = {k: v for k,v in user.model_dump().items() if v is not None}
+    usersCollection.update_one({"email": email}, {"$set": new})
+    if (user.password):
+        passwordsCollection.update_one({"email": email}, {"$set": {"password": getPasswordHash(user.password)}})
+    if user.email:
+        passwordsCollection.update_one({"email": email}, {"$set": {"email": user.email}})
+    return getUser(email)
