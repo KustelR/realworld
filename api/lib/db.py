@@ -17,6 +17,7 @@ db = client["realworld"]
 articlesCollection = db["articles"]
 passwordsCollection = db["passwords"]
 usersCollection = db["users"]
+followCollection = db["follows"]
 
 print("Connected to MongoDB")
 
@@ -80,3 +81,34 @@ def updateUser(email: str, user: UpdateUser):
     if user.email:
         passwordsCollection.update_one({"email": email}, {"$set": {"email": user.email}})
     return getUser(email)
+
+
+def getProfile(username: str, whoAsked: str | None = None) -> dict[str, any] | None:
+    user = usersCollection.find_one({"username": username}, exclude)
+    del(user["email"])
+    if whoAsked:
+        user["following"] = isFollowing(whoAsked, user["username"])
+
+    return user
+
+
+def isFollowing(follower: str, following: str) -> bool:
+    followerId = usersCollection.find_one({"username": follower}, {"_id": 1})
+    followingId = usersCollection.find_one({"username": following}, {"_id": 1})
+    return followCollection.find_one({"follower": followerId, "following": followingId}) is not None
+
+
+def followUser(follower: str, following: str) -> dict[str, any]:
+    followerId = usersCollection.find_one({"username": follower}, {"_id": 1})
+    followingId = usersCollection.find_one({"username": following}, {"_id": 1})
+
+    followCollection.insert_one({"follower": followerId, "following": followingId})
+    return getProfile(following, follower)
+
+
+def unfollowUser(follower: str, following: str) -> dict[str, any]:
+    followerId = usersCollection.find_one({"username": follower}, {"_id": 1})
+    followingId = usersCollection.find_one({"username": following}, {"_id": 1})
+
+    followCollection.delete_one({"follower": followerId, "following": followingId})
+    return getProfile(following, follower)
