@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request
 
-from utils import getTokenFromRequest
-from schemas import UpdateUserBody
+from utils import authentificateRequest, getTokenFromRequest
+from schemas import UpdateUserBody, UserDatabase
 from lib.auth import getEmailFromToken
 from lib.db import authorizeUser, getUser, updateUser
 
@@ -32,22 +32,19 @@ async def get_user(req: Request):
 
 @router.put("/")
 async def update_user(req: Request, body: UpdateUserBody):
-    token = getTokenFromRequest(req.headers)
-    if not token:
-        raise HTTPException(401, "Authorization header missing")
 
+    user: UserDatabase
     try:
-        email = getEmailFromToken(token)
+        user = authentificateRequest(req)
     except Exception as e:
-        raise HTTPException(401, f"Invalid token: {str(e)}")
-    
-    user = getUser(email)
+        raise HTTPException(401, f"Authentication failed: {str(e)}")
+
     if not user:
         raise HTTPException(404, "User not found")
 
 
 
-    updated = updateUser(email, body.user)
-    updated["token"] = token
+    updated = updateUser(user.email, body.user)
+    updated["token"] = getTokenFromRequest(req)
     
     return {"user": updated}
