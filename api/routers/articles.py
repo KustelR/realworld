@@ -44,22 +44,24 @@ async def read_articles(req: Request, author: str = None, tag: str = None):
 
 
 @router.post("/")
-async def create_article(body: ArticlePostBody):
+async def create_article(body: ArticlePostBody, req: Request):
     article = body.article.model_dump()
-    article["slug"] = getSlug(article["title"])
-    article["author"] = UserPublic(
-        username="Joe",
-        bio="",
-        image=""
-    )
+
+    user: UserDatabase
+    try:
+        user = authentificateRequest(req)
+    except Exception as e:
+        raise HTTPException(401, f"Authentication failed: {str(e)}")
+    
     article["createdAt"] = datetime.datetime.now().astimezone().isoformat() 
     article["updatedAt"] = datetime.datetime.now().astimezone().isoformat() 
+    article["author"] = user
+    article["slug"] = getSlug(article["title"])
 
-    newArticle = Article.model_validate(article);
-    db.createArticle(newArticle)
+    created = db.createArticle(article, user)
 
     return {
-        "article": newArticle
+        "article": created
     }
 
 

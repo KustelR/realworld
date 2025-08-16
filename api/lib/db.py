@@ -2,7 +2,7 @@ import os
 import pymongo
 
 from lib.auth import generateAccessToken, getPasswordHash, verifyPassword
-from schemas import Article, DatabaseArticle, UpdateUser, User
+from schemas import Article, DatabaseArticle, UpdateUser, User, UserDatabase
 
 
 MONGODB_CONNECTION = os.environ.get("MONGODB_CONNECTION")
@@ -49,10 +49,11 @@ def readArticle(slug: str, whoAsked: str | None = None) -> dict[str, any] | None
     return entry
 
 
-def createArticle(article: Article):
-
-    articlesCollection.insert_one(DatabaseArticle.model_validate(article.model_dump()).model_dump())
-    return article
+def createArticle(raw: dict[str, any], author: UserDatabase):
+    article = DatabaseArticle.model_validate(raw)
+    
+    articlesCollection.insert_one(article.model_dump())
+    return readArticle(article.slug, author.email)
 
 
 def updateArticle(slug: str, article: Article):
