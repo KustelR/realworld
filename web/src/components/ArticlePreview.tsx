@@ -51,9 +51,11 @@ function ArticleMeta(props: {
         </a>
         <span className="date">{date}</span>
       </div>
-      <button className="btn btn-outline-primary btn-sm pull-xs-right">
-        <i className="ion-heart"></i> {likes}
-      </button>
+      <FavoriteButton
+        slug={slug}
+        favoritesNumber={favoritesNumber}
+        favorited={false}
+      />
     </div>
   );
 }
