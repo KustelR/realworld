@@ -64,3 +64,27 @@ class Article(BaseModel):
 
 class DatabaseArticle(Article):
     deleted: bool = False;
+
+
+class Comment(BaseModel):
+    id: str
+    createdAt: str
+    updatedAt: str
+    body: str
+
+
+class CommentDatabase(Comment):
+    authorEmail: str
+    articleSlug: str
+
+
+class CommentPublic(Comment):
+    author: UserPublic
+
+
+class CommentPost(BaseModel):
+    body: str
+
+
+class CommentPostBody(BaseModel):
+    comment: CommentPost
