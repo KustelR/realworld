@@ -1,9 +1,10 @@
 import os
+import uuid
 import pymongo
 
 from utils.timestamp import timestamp
 from lib.auth import generateAccessToken, getPasswordHash, verifyPassword
-from schemas import Article, DatabaseArticle, UpdateUser, User, UserDatabase
+from schemas import Article, Comment, CommentDatabase, CommentPublic, DatabaseArticle, UpdateUser, User, UserDatabase
 
 
 MONGODB_CONNECTION = os.environ.get("MONGODB_CONNECTION")
@@ -21,18 +22,23 @@ passwordsCollection = db["passwords"]
 usersCollection = db["users"]
 followCollection = db["follows"]
 favoritesCollection = db["favorites"]
+commentsCollection = db["comments"]
 
 print("Connected to MongoDB")
 
 
-def readArticles(whoAsked: str | None = None) -> list[dict[str, any]]:
-    articles: list[str, any] = list(articlesCollection.find({"deleted": False}, exclude))
+def readArticles(query: dict[str, any] | None = None, whoAsked: str | None = None) -> list[dict[str, any]]:
+    if not query:
+        query = {"deleted": False}
+    else:
+        query["deleted"] = False
+
+    articles: list[str, any] = list(articlesCollection.find(query, exclude))
     for article in articles:
         favorites = favoritesCollection.count_documents({"slug": article["slug"]})
         article["favoritesCount"] = favorites
 
         if whoAsked:
-            print(whoAsked, article["slug"], isFavorite(whoAsked, article["slug"]))
             article["favorited"] = isFavorite(whoAsked, article["slug"])
         else:
             article["favorited"] = False
@@ -42,6 +48,9 @@ def readArticles(whoAsked: str | None = None) -> list[dict[str, any]]:
 def readArticle(slug: str, whoAsked: str | None = None) -> dict[str, any] | None:
     favorites = favoritesCollection.count_documents({"slug": slug})
     entry = articlesCollection.find_one({"deleted": False, "slug": slug}, exclude)
+    if not entry:
+        return None
+    
     entry["favoritesCount"] = favorites
     if whoAsked:
         entry["favorited"] = isFavorite(whoAsked, slug)
@@ -51,6 +60,7 @@ def readArticle(slug: str, whoAsked: str | None = None) -> dict[str, any] | None
 
 
 def createArticle(raw: dict[str, any], author: UserDatabase):
+    raw["createdAt"] = raw["updatedAt"] = timestamp()
     article = DatabaseArticle.model_validate(raw)
     
     articlesCollection.insert_one(article.model_dump())
@@ -90,8 +100,11 @@ def authorizeUser(email: str, password: str):
     return res
 
 
-def getUser(email: str) -> dict[str, any] | None:
-    user = usersCollection.find_one({"email": email}, exclude)
+def getUser(email: str | None = None, username: str | None = None) -> dict[str, any] | None:
+    if email:
+        user = usersCollection.find_one({"email": email}, exclude)
+    elif username:
+        user = usersCollection.find_one({"username": username}, exclude)
     return user
 
 
@@ -172,3 +185,63 @@ def unfavoriteArticle(email: str, slug: str) -> dict[str, any]:
 
     favoritesCollection.delete_one({"u_id": uid, "slug": slug})
     return readArticle(slug, email)
+
+
+def getFavorites(username: str) -> list[str]:
+    user = getUser(username=username)
+    uid = usersCollection.find_one({"email": user["email"]}, {"_id": 1})["_id"]
+    if not uid:
+        raise Exception("User not found")
+    favorites = favoritesCollection.find({"u_id": uid}, {"slug": 1, "_id": 0})
+    return [f["slug"] for f in favorites]
+
+
+def readComment(id: str) -> CommentPublic | None:
+    comment = commentsCollection.find_one({"id": id}, exclude)
+    
+    if not comment:
+        return None
+
+    authorEmail = comment.get("authorEmail")
+
+    commentPublic = {
+        "id": comment["id"],
+        "createdAt": comment["createdAt"],
+        "updatedAt": comment["updatedAt"],
+        "body": comment["body"],
+        "author": getUser(email=authorEmail)
+    }
+    
+
+    return CommentPublic.model_validate(commentPublic)
+
+
+def readComments(articleSlug: str) -> list[CommentPublic]:
+    comments = commentsCollection.find({"articleSlug": articleSlug}, exclude)
+    comments = [{**comment, "author": getUser(email=comment["authorEmail"])} for comment in comments]
+    return [CommentPublic.model_validate(c) for c in comments]
+
+
+def createComment(articleSlug: str, commentBody: str, authorEmail: str) -> dict[str, any]:
+    article = readArticle(articleSlug)
+
+    if not article:
+        raise Exception("Article not found")
+    
+    raw = {
+        "id": uuid.uuid4().hex,
+        "articleSlug": articleSlug,
+        "authorEmail": authorEmail,
+        "body": commentBody,
+        "createdAt": timestamp(),
+        "updatedAt": timestamp()
+    }
+    comment = CommentDatabase.model_validate(raw)
+
+    commentsCollection.insert_one(comment.model_dump())
+    return readComment(comment.id)
+
+
+def getTags() -> list[str]:
+    tags = articlesCollection.distinct("tagList")
+    return sorted(tags)

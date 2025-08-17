@@ -1,9 +1,8 @@
-import datetime
 from fastapi import APIRouter, HTTPException, Request
 
 import lib.db as db
 from utils.utils import authentificateRequest, getSlug
-from schemas import Article, ArticlePostBody, ArticlePutBody, UserDatabase, UserPublic
+from schemas import Article, ArticlePostBody, ArticlePutBody, CommentPostBody, UserDatabase, UserPublic
 
 router = APIRouter()
 
@@ -19,7 +18,7 @@ async def read_feed(req: Request):
     except Exception as e:
         raise HTTPException(401, f"Authentication failed: {str(e)}")
 
-    articles = db.readArticles(user.email)
+    articles = db.readArticles(None, user.email)
     return {
         "articles": articles,
         "articlesCount": len(articles)
@@ -27,7 +26,7 @@ async def read_feed(req: Request):
 
 
 @router.get("/")
-async def read_articles(req: Request, author: str = None, tag: str = None):
+async def read_articles(req: Request, author: str = None, favorited: str = None, tag: str = None):
 
     user: UserDatabase | None
     try:
@@ -35,7 +34,19 @@ async def read_articles(req: Request, author: str = None, tag: str = None):
     except Exception as e:
         user = None
 
-    articles = db.readArticles(user.email if user else None)
+    query: dict[str, any] = {"deleted": False}
+    if author:
+        query["author.username"] = author
+    if tag:
+        query["tagList"] = tag
+    if favorited:
+        query["slug"] = {"$in": db.getFavorites(favorited)}
+
+    articles = db.readArticles(query, user.email if user else None)
+    for article in articles:
+        tagList = sorted(article["tagList"], key=lambda x: 0 if x == tag else 1) if tag else article["tagList"]
+        article["tagList"] = tagList
+
     return {
         "articles": articles,
         "articlesCount": len(articles)
@@ -53,8 +64,6 @@ async def create_article(body: ArticlePostBody, req: Request):
     except Exception as e:
         raise HTTPException(401, f"Authentication failed: {str(e)}")
     
-    article["createdAt"] = datetime.datetime.now().astimezone().isoformat() 
-    article["updatedAt"] = datetime.datetime.now().astimezone().isoformat() 
     article["author"] = user
     article["slug"] = getSlug(article["title"])
 
@@ -128,3 +137,25 @@ async def unfavorite_article(slug: str, req: Request):
         "article": unfavorited
     }
 
+
+@router.get("/{slug}/comments")
+async def read_comments(slug: str):
+    comments = db.readComments(slug)
+    return {
+        "comments": comments
+    }
+
+
+@router.post("/{slug}/comments")
+async def create_comment(slug: str, body: CommentPostBody, req: Request):
+    
+    user: UserDatabase
+    try:
+        user = authentificateRequest(req)
+    except Exception as e:
+        raise HTTPException(401, f"Authentication failed: {str(e)}")
+
+    comment = db.createComment(slug, body.comment.body, user.email)
+    return {
+        "comment": comment
+    }
