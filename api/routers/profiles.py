@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Request
 
 from lib.auth import getEmailFromToken
 from schemas import User, UserDatabase
-from utils import authentificateRequest, getTokenFromRequest
+from utils.utils import authentificateRequest
 from lib.db import followUser, getProfile, unfollowUser
 from lib.db import getUser, isFollowing 
 

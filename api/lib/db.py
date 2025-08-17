@@ -1,6 +1,7 @@
 import os
 import pymongo
 
+from utils.timestamp import timestamp
 from lib.auth import generateAccessToken, getPasswordHash, verifyPassword
 from schemas import Article, DatabaseArticle, UpdateUser, User, UserDatabase
 

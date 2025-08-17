@@ -31,6 +31,5 @@ def authentificateRequest(req: Request) -> User:
     if not user:
         raise Exception("User not found")
     
-    print(user)
-    
     return UserDatabase.model_validate(user)
+ 

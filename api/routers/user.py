@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Request
 
-from utils import authentificateRequest, getTokenFromRequest
+from utils.utils import authentificateRequest, getTokenFromRequest
 from schemas import UpdateUserBody, UserDatabase
 from lib.auth import getEmailFromToken
 from lib.db import authorizeUser, getUser, updateUser

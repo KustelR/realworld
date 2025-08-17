@@ -2,7 +2,7 @@ import datetime
 from fastapi import APIRouter, HTTPException, Request
 
 import lib.db as db
-from utils import authentificateRequest, getSlug
+from utils.utils import authentificateRequest, getSlug
 from schemas import Article, ArticlePostBody, ArticlePutBody, UserDatabase, UserPublic
 
 router = APIRouter()
