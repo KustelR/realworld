@@ -2,52 +2,63 @@ import { usernameToPath } from "@/lib/utils/usernameToPath";
 import Link from "next/link";
 import Image from "next/image";
 import TagList from "./TagList";
+import FavoriteButton from "./FavoriteButton";
+
+export type User = {
+  username: string;
+  image: string;
+  bio: string;
+};
 
 export type ArticlePreviewProps = {
-  author: string;
-  authorPFP: string;
-  date: string;
-  header: string;
-  description: string;
-  likes: number;
-  tags: string[];
+  article: Article;
 };
 
 export default function ArticlePreview(props: ArticlePreviewProps) {
-  const { author, date, header, description, tags, authorPFP, likes } = props;
+  const {
+    slug,
+    author,
+    createdAt,
+    title,
+    description,
+    tagList,
+    favoritesCount,
+  } = props.article;
   return (
     <div className="article-preview">
       <ArticleMeta
+        slug={slug}
         author={author}
-        authorPFP={authorPFP}
-        date={date}
-        likes={likes}
+        date={createdAt}
+        favoritesNumber={favoritesCount}
       />
-      <a href={`/article/${usernameToPath(header)}`} className="preview-link">
-        <h1>{header}</h1>
+      <a href={`/article/${usernameToPath(title)}`} className="preview-link">
+        <h1>{title}</h1>
         <p>{description}</p>
         <span>Read more...</span>
-        <TagList tags={tags} />
+        <TagList tags={tagList} />
       </a>
     </div>
   );
 }
 
 function ArticleMeta(props: {
-  author: string;
-  authorPFP: string;
+  slug: string;
+  author: User;
   date: string;
-  likes: number;
+  favoritesNumber: number;
 }) {
-  const { author, authorPFP, date, likes } = props;
+  const { slug, author, date, favoritesNumber } = props;
   return (
     <div className="article-meta">
-      <Link href={`/profile/${usernameToPath(author)}`}>
-        <Image src={authorPFP} alt="author" width={32} height={32} />
+      <Link href={`/profile/${author.username}`}>
+        {author.image && (
+          <Image src={author.image} alt="author" width={32} height={32} />
+        )}
       </Link>
       <div className="info">
-        <a href={`/profile/${usernameToPath(author)}`} className="author">
-          {author}
+        <a href={`/profile/${author.username}`} className="author">
+          {author.username}
         </a>
         <span className="date">{date}</span>
       </div>

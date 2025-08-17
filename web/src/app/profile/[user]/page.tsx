@@ -66,7 +66,7 @@ export default async function Page() {
   );
 }
 
-function Articles(props: { articles: ArticlePreviewProps[] }) {
+function Articles(props: { articles: ArticlePreviewProps }) {
   const { articles } = props;
   return (
     <div className="container">
@@ -81,7 +81,7 @@ function Articles(props: { articles: ArticlePreviewProps[] }) {
           />
 
           {articles.map((article) => (
-            <ArticlePreview key={article.header} {...article} />
+            <ArticlePreview key={article.title} {...article} />
           ))}
 
           <Pagination />

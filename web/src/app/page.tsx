@@ -1,50 +1,21 @@
-import Link from "next/link";
-import Image from "next/image";
-import { usernameToPath } from "@/lib/utils/usernameToPath";
-import ArticlePreview, {
-  ArticlePreviewProps,
-} from "@/components/ArticlePreview";
+import ArticlePreview from "@/components/ArticlePreview";
 import FeedToggle from "@/components/FeedToggle";
+import fetchFromAPI from "@/lib/fetchFromAPI";
 
-async function getArticles(): Promise<ArticlePreviewProps[]> {
-  return [
-    {
-      author: "Eric Simons",
-      authorPFP: "http://i.imgur.com/Qr71crq.jpg",
-      date: "January 20th",
-      header: "How to build webapps that scale",
-      description: "This is the description for the post.",
-      likes: 29,
-      tags: ["realworld", "implementations"],
-    },
-    {
-      author: "Albert Pai",
-      authorPFP: "http://i.imgur.com/N4VcUeJ.jpg",
-      date: "January 20th",
-      header:
-        "The song you won't ever stop singing. No matter how hard you try.",
-      description: "This is the description for the post.",
-      likes: 32,
-      tags: ["realworld", "implementations"],
-    },
-  ];
+async function getArticles(): Promise<{ articles: Article[] }> {
+  const data = await fetchFromAPI("/articles");
+  const articles: Article[] = (await data.json()).articles;
+  return { articles };
 }
 
 async function getPopularTags(): Promise<string[]> {
-  return [
-    "programming",
-    "javascript",
-    "emberjs",
-    "angularjs",
-    "react",
-    "mean",
-    "node",
-    "rails",
-  ];
+  const data = await fetchFromAPI("/tags");
+  const tags: string[] = (await data.json()).tags;
+  return tags;
 }
 
 export default async function Home() {
-  const articles = await getArticles();
+  const articles = (await getArticles()).articles;
   const popularTags = await getPopularTags();
   return (
     <div className="home-page">
@@ -61,7 +32,7 @@ export default async function Home() {
               ]}
             />
             {articles.map((article) => (
-              <ArticlePreview key={article.header} {...article} />
+              <ArticlePreview key={article.slug} article={article} />
             ))}
             <Pagination />
           </div>
