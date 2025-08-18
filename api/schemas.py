@@ -35,8 +35,15 @@ class UserDatabase(UserPublic):
 class User(UserDatabase):
     password: str
 
+
+class UserRegistration(BaseModel):
+    username: str
+    email: str
+    password: str
+
 class RegistrationBody(BaseModel):
-    user: User
+    user: UserRegistration
+
 
 class AuthUser(User):
     token: str

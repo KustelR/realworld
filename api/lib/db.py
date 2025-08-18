@@ -83,13 +83,15 @@ def createUser(user: User):
     passwordsCollection.insert_one({"email": user.email, "password": hashed})
 
     userPublic = user.model_dump()
+    userPublic["bio"] = "new user"
+    userPublic["image"] = "https://i.imgur.com/yindx4o.png"
 
     del(userPublic["password"])
-    usersCollection.insert_one(userPublic.copy());
 
     token = generateAccessToken(user.email)
     userPublic["token"] = token
 
+    usersCollection.insert_one(userPublic.copy());
     return {"user": userPublic}
 
 
@@ -101,10 +103,12 @@ def authorizeUser(email: str, password: str):
 
 
 def getUser(email: str | None = None, username: str | None = None) -> dict[str, any] | None:
+    user = None
     if email:
         user = usersCollection.find_one({"email": email}, exclude)
     elif username:
         user = usersCollection.find_one({"username": username}, exclude)
+    print(user)
     return user
 
 

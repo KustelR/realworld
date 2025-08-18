@@ -9,6 +9,7 @@ router = APIRouter()
 
 @router.post("/")
 async def create_user(body: RegistrationBody):
+    
     user = body.user
     return createUser(user)
 
