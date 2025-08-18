@@ -1,7 +1,21 @@
 "use client";
 
+import { getCookie, setCookie } from "cookies-next";
+
 import ErrorMessages from "@/components/ErrorMessages";
+import fetchClient from "@/lib/req/fetchClient";
 import Link from "next/link";
+import { FormEvent, useState } from "react";
+
+interface RegistrationResult {
+  user: {
+    email: string;
+    username: string;
+    image: string;
+    bio: string;
+    token: string;
+  };
+}
 
 export default function Page() {
   return (
@@ -14,7 +28,22 @@ export default function Page() {
               <Link href="/login">Have an account?</Link>
             </p>
             <ErrorMessages messages={["That email is already taken"]} />
-            <AuthForm />
+            <AuthForm
+              onSubmit={async (data) => {
+                const response = await fetchClient("/users/", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ user: data }),
+                });
+                const result = (await response.json()) as RegistrationResult;
+                if (response.ok) {
+                  setCookie("Authorization", `Token ${result.user.token}`);
+                  window.location.href = `/profile/${result.user.username}`;
+                }
+              }}
+            />
           </div>
         </div>
       </div>
@@ -29,21 +58,23 @@ type AuthData = {
 };
 
 function AuthForm(props: { onSubmit?: (data: AuthData) => void } = {}) {
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   return (
     <form
-      onSubmit={(e) => {
+      onSubmit={(e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const formData = new FormData(e.currentTarget);
-        const data: AuthData = {
-          username: formData.get("username") as string,
-          email: formData.get("email") as string,
-          password: formData.get("password") as string,
-        };
-        props.onSubmit?.(data);
+        props.onSubmit?.({
+          username,
+          email,
+          password,
+        });
       }}
     >
       <fieldset className="form-group">
         <input
+          onChange={(e) => setUsername(e.target.value)}
           className="form-control form-control-lg"
           type="text"
           placeholder="Username"
@@ -51,6 +82,7 @@ function AuthForm(props: { onSubmit?: (data: AuthData) => void } = {}) {
       </fieldset>
       <fieldset className="form-group">
         <input
+          onChange={(e) => setEmail(e.target.value)}
           className="form-control form-control-lg"
           type="text"
           placeholder="Email"
@@ -58,6 +90,7 @@ function AuthForm(props: { onSubmit?: (data: AuthData) => void } = {}) {
       </fieldset>
       <fieldset className="form-group">
         <input
+          onChange={(e) => setPassword(e.target.value)}
           className="form-control form-control-lg"
           type="password"
           placeholder="Password"
