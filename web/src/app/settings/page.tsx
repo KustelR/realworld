@@ -1,4 +1,5 @@
 import ErrorMessages from "@/components/ErrorMessages";
+import LogoutButton from "@/components/LogoutButton";
 
 export default function Page() {
   return (
@@ -10,9 +11,7 @@ export default function Page() {
             <ErrorMessages messages={["That name is required"]} />
             <UpdateForm />
             <hr />
-            <button className="btn btn-outline-danger">
-              Or click here to logout.
-            </button>
+            <LogoutButton />
           </div>
         </div>
       </div>
