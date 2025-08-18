@@ -1,15 +1,19 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usernameToPath } from "@/lib/utils/usernameToPath";
+import fetchAuth from "@/lib/req/fetchServer";
 
-async function getUser(auth: boolean = false) {
-  // Simulate fetching user data
-  if (!auth) return { username: undefined };
-  return { username: "John Dou" };
+async function getUser(): Promise<User | undefined> {
+  const response = await fetchAuth("/user");
+
+  const data = await response.json();
+  const user = data.user;
+  return user ?? user;
 }
 
 export default async function Header() {
-  const { username } = await getUser(true);
+  const user = await getUser();
+  const { username } = user ?? {};
   return (
     <nav className="navbar navbar-light">
       <NavBarContainer>
@@ -26,36 +30,42 @@ export default async function Header() {
             </NavItem>
           </>
         )}
-        {username && (
-          <>
-            <NavItem>
-              <Link href="/editor" className="ion-compose">
-                New Article
-              </Link>
-            </NavItem>
-            <NavItem>
-              <Link href="/settings" className="ion-gear-a">
-                Settings
-              </Link>
-            </NavItem>
-            <NavItem>
-              <Link
-                href={`/profile/${usernameToPath(username)}`}
-                className="ion-person"
-              >
-                <Image
-                  src="http://i.imgur.com/Qr71crq.jpg"
-                  className="user-pic"
-                  alt={username}
-                  width={32}
-                  height={32}
-                />
-              </Link>
-            </NavItem>
-          </>
-        )}
+        {user && <UserCorner user={user} />}
       </NavBarContainer>
     </nav>
+  );
+}
+
+function UserCorner(props: { user: User }) {
+  const { user } = props;
+  const { username, image } = user;
+  return (
+    <>
+      <NavItem>
+        <Link href="/editor" className="ion-compose">
+          New Article
+        </Link>
+      </NavItem>
+      <NavItem>
+        <Link href="/settings" className="ion-gear-a">
+          Settings
+        </Link>
+      </NavItem>
+      <NavItem>
+        <Link
+          href={`/profile/${usernameToPath(username)}`}
+          className="ion-person"
+        >
+          <Image
+            src={image ?? ""}
+            className="user-pic"
+            alt={username}
+            width={32}
+            height={32}
+          />
+        </Link>
+      </NavItem>
+    </>
   );
 }
 
