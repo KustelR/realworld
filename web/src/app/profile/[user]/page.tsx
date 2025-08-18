@@ -2,40 +2,20 @@ import ArticlePreview, {
   ArticlePreviewProps,
 } from "@/components/ArticlePreview";
 import FeedToggle from "@/components/FeedToggle";
+import fetchServer from "@/lib/req/fetchServer";
 import Image from "next/image";
 
-async function getMyArticles() {
-  // Simulate fetching articles for the user
-  return [
-    {
-      author: "Eric Simons",
-      authorPFP: "http://i.imgur.com/Qr71crq.jpg",
-      date: "January 20th",
-      header: "How to build webapps that scale",
-      description: "This is the description for the post.",
-      likes: 29,
-      tags: ["realworld", "implementations"],
-    },
-    {
-      author: "Albert Pai",
-      authorPFP: "http://i.imgur.com/N4VcUeJ.jpg",
-      date: "January 20th",
-      header:
-        "The song you won't ever stop singing. No matter how hard you try.",
-      description: "This is the description for the post.",
-      likes: 32,
-      tags: ["realworld", "implementations"],
-    },
-  ];
+async function getMyArticles(): Promise<Article[]> {
+  const user = (await (await fetchServer("/user")).json()).user;
+  const articles = await (
+    await fetchServer(`/articles?author=${user.username}`)
+  ).json();
+  console.log(articles, user);
+  return articles.articles;
 }
 
 async function getUser() {
-  // Simulate fetching user data
-  return {
-    username: "Eric Simons",
-    bio: "Cofounder @GoThinkster, lived in Aol's HQ for a few months, kinda looks like Peeta from the Hunger Games",
-    image: "http://i.imgur.com/Qr71crq.jpg",
-  };
+  return (await (await fetchServer("/user")).json()).user;
 }
 
 export default async function Page() {
@@ -66,7 +46,7 @@ export default async function Page() {
   );
 }
 
-function Articles(props: { articles: ArticlePreviewProps }) {
+function Articles(props: { articles: Article[] }) {
   const { articles } = props;
   return (
     <div className="container">
@@ -81,7 +61,7 @@ function Articles(props: { articles: ArticlePreviewProps }) {
           />
 
           {articles.map((article) => (
-            <ArticlePreview key={article.title} {...article} />
+            <ArticlePreview key={article.slug} article={article} />
           ))}
 
           <Pagination />
