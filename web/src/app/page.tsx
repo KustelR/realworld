@@ -1,15 +1,15 @@
 import ArticlePreview from "@/components/ArticlePreview";
 import FeedToggle from "@/components/FeedToggle";
-import fetchFromAPI from "@/lib/fetchFromAPI";
+import fetchServer from "@/lib/req/fetchServer";
 
 async function getArticles(): Promise<{ articles: Article[] }> {
-  const data = await fetchFromAPI("/articles");
+  const data = await fetchServer("/articles");
   const articles: Article[] = (await data.json()).articles;
   return { articles };
 }
 
 async function getPopularTags(): Promise<string[]> {
-  const data = await fetchFromAPI("/tags");
+  const data = await fetchServer("/tags");
   const tags: string[] = (await data.json()).tags;
   return tags;
 }

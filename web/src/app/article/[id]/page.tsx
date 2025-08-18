@@ -4,7 +4,7 @@ import { usernameToPath } from "@/lib/utils/usernameToPath";
 import Link from "next/link";
 import Image from "next/image";
 import ArticleComments from "@/components/ArticleComments";
-import fetchFromAPI from "@/lib/fetchFromAPI";
+import fetchFromAPI from "@/lib/req/fetchServer";
 
 type ArticleItem = { type: "p" | "h2"; content: string };
 type ArticleContent = { text: ArticleItem[] };

@@ -1,6 +1,6 @@
 "use client";
 
-import fetchFromAPI from "@/lib/fetchFromAPI";
+import fetchClient from "@/lib/req/fetchClient";
 
 export default function FavoriteButton(props: {
   slug: string;
@@ -12,7 +12,7 @@ export default function FavoriteButton(props: {
     <button
       className="btn btn-outline-primary btn-sm pull-xs-right"
       onClick={() => {
-        fetchFromAPI(`/articles/${slug}/favorite`, {
+        fetchClient(`/articles/${slug}/favorite`, {
           method: "POST",
         });
       }}
