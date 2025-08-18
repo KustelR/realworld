@@ -11,23 +11,18 @@ router = APIRouter()
 
 @router.get("/")
 async def get_user(req: Request):
+
     token = getTokenFromRequest(req)
-    if not token:
-        raise HTTPException(401, "Authorization header missing")
-
+    user: UserDatabase
     try:
-        email = getEmailFromToken(token)
+        user = authentificateRequest(req)
     except Exception as e:
-        raise HTTPException(401, f"Invalid token: {str(e)}")
-    if not email:
-        raise HTTPException(401, "Invalid token")
+        raise HTTPException(401, f"Authentication failed: {str(e)}")
+        
+    result = user.model_dump()
+    result["token"] = token
+    return {"user": result}
 
-    user = getUser(email)
-    if not user:
-        raise HTTPException(404, "User not found")
-    
-    user["token"] = token
-    return {"user": user}
 
 
 @router.put("/")
