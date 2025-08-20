@@ -17,3 +17,7 @@ interface User {
   image: string;
   following?: boolean;
 }
+
+interface AuthActionResult {
+  token: string;
+}

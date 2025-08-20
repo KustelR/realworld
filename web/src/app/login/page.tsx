@@ -1,7 +1,10 @@
 "use client";
 
 import ErrorMessages from "@/components/ErrorMessages";
+import fetchClient from "@/lib/req/fetchClient";
+import { setCookie } from "cookies-next";
 import Link from "next/link";
+import { useRef, useState } from "react";
 
 export default function Page() {
   return (
@@ -14,7 +17,15 @@ export default function Page() {
               <Link href="/register">Need an account?</Link>
             </p>
             <ErrorMessages messages={["That email is already taken"]} />
-            <LoginForm onSubmit={(data) => console.log(data)} />
+            <LoginForm
+              onSubmit={async (data) => {
+                const user = await login(data.email, data.password);
+                if (user) {
+                  setCookie("Authorization", `Token ${user.user.token}`);
+                  window.location.href = `/profile/${user.user.username}`;
+                }
+              }}
+            />
           </div>
         </div>
       </div>
@@ -23,25 +34,29 @@ export default function Page() {
 }
 
 type LoginData = {
-  login: string;
+  email: string;
   password: string;
 };
 
 function LoginForm(props: { onSubmit: (data: LoginData) => void }) {
+  const email = useRef<HTMLInputElement | null>(null);
+  const password = useRef<HTMLInputElement | null>(null);
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        const formData = new FormData(e.currentTarget);
+        const emailValue = email?.current?.value;
+        const passwordValue = password?.current?.value;
         const data: LoginData = {
-          login: formData.get("login") as string,
-          password: formData.get("password") as string,
+          email: emailValue ?? "",
+          password: passwordValue ?? "",
         };
         props.onSubmit(data);
       }}
     >
       <fieldset className="form-group">
         <input
+          ref={email}
           className="form-control form-control-lg"
           type="text"
           name="login"
@@ -50,6 +65,7 @@ function LoginForm(props: { onSubmit: (data: LoginData) => void }) {
       </fieldset>
       <fieldset className="form-group">
         <input
+          ref={password}
           className="form-control form-control-lg"
           type="password"
           name="password"
@@ -59,4 +75,18 @@ function LoginForm(props: { onSubmit: (data: LoginData) => void }) {
       <button className="btn btn-lg btn-primary pull-xs-right">Sign in</button>
     </form>
   );
+}
+
+async function login(
+  email: string,
+  password: string,
+): Promise<{ user: User & AuthActionResult }> {
+  const response = await fetchClient("/users/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ user: { email, password } }),
+  });
+  return response.json();
 }
