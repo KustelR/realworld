@@ -7,6 +7,7 @@ interface Article {
   createdAt: string;
   updatedAt: string;
   favoritesCount: number;
+  favorited?: boolean;
   author: User;
 }
 

@@ -23,6 +23,7 @@ export default function ArticlePreview(props: ArticlePreviewProps) {
     description,
     tagList,
     favoritesCount,
+    favorited,
   } = props.article;
   return (
     <div className="article-preview">
@@ -31,6 +32,7 @@ export default function ArticlePreview(props: ArticlePreviewProps) {
         author={author}
         date={createdAt}
         favoritesNumber={favoritesCount}
+        favorited={favorited}
       />
       <a href={`/article/${usernameToPath(title)}`} className="preview-link">
         <h1>{title}</h1>
@@ -47,8 +49,9 @@ function ArticleMeta(props: {
   author: User;
   date: string;
   favoritesNumber: number;
+  favorited?: boolean;
 }) {
-  const { slug, author, date, favoritesNumber } = props;
+  const { slug, author, date, favoritesNumber, favorited } = props;
   return (
     <div className="article-meta">
       <Link href={`/profile/${author.username}`}>
@@ -65,7 +68,7 @@ function ArticleMeta(props: {
       <FavoriteButton
         slug={slug}
         favoritesNumber={favoritesNumber}
-        favorited={false}
+        favorited={favorited ?? false}
       />
     </div>
   );

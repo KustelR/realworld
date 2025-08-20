@@ -14,8 +14,13 @@ async function getArticle(slug: string): Promise<{ article: Article }> {
   return await data.json();
 }
 
-export default async function Page({ params }: { params: { id: string } }) {
-  const article = (await getArticle(params.id)).article;
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const article = (await getArticle(id)).article;
   return (
     <div className="article-page">
       <Banner article={article} />
