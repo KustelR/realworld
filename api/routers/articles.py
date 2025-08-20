@@ -70,8 +70,15 @@ async def create_article(body: ArticlePostBody, req: Request):
 
 
 @router.get("/{slug}")
-async def read_article(slug: str):
-    article = db.readArticle(slug)
+async def read_article(slug: str, req: Request):
+
+    user: UserDatabase | None
+    try:
+        user = authentificateRequest(req)
+    except HTTPException:
+        user = None
+
+    article = db.readArticle(slug, user.email if user else None)
     if article:
         return {
             "article": article
