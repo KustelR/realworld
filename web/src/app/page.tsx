@@ -1,4 +1,4 @@
-import ArticlePreview from "@/components/ArticlePreview";
+import ArticlePreview from "@/components/ArticlePreview/ArticlePreview";
 import FeedToggle from "@/components/FeedToggle";
 import fetchServer from "@/lib/req/fetchServer";
 

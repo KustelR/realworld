@@ -1,6 +1,7 @@
 "use client";
 
 import fetchClient from "@/lib/req/fetchClient";
+import favoriteAction from "@/lib/utils/favoriteSwitch";
 import { useEffect, useState } from "react";
 
 export default function FavoriteButton(props: {
@@ -28,23 +29,4 @@ export default function FavoriteButton(props: {
       {favoritesCount}
     </button>
   );
-}
-
-async function favoriteAction(
-  favorited: boolean,
-  slug: string,
-): Promise<Article> {
-  let data: any;
-  if (favorited) {
-    data = await fetchClient(`/articles/${slug}/favorite`, {
-      method: "DELETE",
-    });
-  } else {
-    data = await fetchClient(`/articles/${slug}/favorite`, {
-      method: "POST",
-    });
-  }
-  return await (
-    await data.json()
-  ).article;
 }

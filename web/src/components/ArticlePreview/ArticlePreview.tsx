@@ -1,7 +1,7 @@
 import { usernameToPath } from "@/lib/utils/usernameToPath";
 import Link from "next/link";
 import Image from "next/image";
-import TagList from "./TagList";
+import TagList from "../TagList";
 import FavoriteButton from "./FavoriteButton";
 
 export type User = {

@@ -1,6 +1,6 @@
 import ArticlePreview, {
   ArticlePreviewProps,
-} from "@/components/ArticlePreview";
+} from "@/components/ArticlePreview/ArticlePreview";
 import FeedToggle from "@/components/FeedToggle";
 import fetchServer from "@/lib/req/fetchServer";
 import Image from "next/image";
