@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from lib.db import authorizeUser, createUser, getUser
+from lib.db import NameTakenException, authorizeUser, createUser, getUser
 from schemas import AuthUser, RegistrationBody, User
 from lib.auth import generateAccessToken, getPasswordHash, getEmailFromToken
 
@@ -11,7 +11,10 @@ router = APIRouter()
 async def create_user(body: RegistrationBody):
     
     user = body.user
-    return createUser(user)
+    try:
+        return createUser(user)
+    except NameTakenException as e:
+        raise HTTPException(409, "This email is already taken")
 
 @router.post("/login")
 async def login(body: dict):

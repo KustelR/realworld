@@ -98,6 +98,10 @@ def deleteArticle(slug: str):
 
 
 def createUser(user: User):
+    isNewUser = isUnique(usersCollection, {"email": user.email})
+    if not isNewUser:
+        raise NameTakenException("Email already taken")
+    
     hashed = getPasswordHash(user.password)
     passwordsCollection.insert_one({"email": user.email, "password": hashed})
 
@@ -245,7 +249,7 @@ def readComments(articleSlug: str) -> list[CommentPublic]:
     return [CommentPublic.model_validate(c) for c in comments]
 
 
-def createComment(articleSlug: str, commentBody: str, authorEmail: str) -> dict[str, any]:
+def createComment(articleSlug: str, commentBody: str, authorEmail: str) -> dict[str, any]:    
     article = readArticle(articleSlug)
 
     if not article:
