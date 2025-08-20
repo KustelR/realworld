@@ -48,6 +48,16 @@ class RegistrationBody(BaseModel):
 class AuthUser(User):
     token: str
 
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+
+class LoginRequest(BaseModel):
+    user: UserLogin
+    
+
 class UpdateUser(BaseModel):
     username: str | None = None
     email: str | None = None

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
 from lib.db import NameTakenException, authorizeUser, createUser, getUser
-from schemas import AuthUser, RegistrationBody, User
+from schemas import AuthUser, LoginRequest, RegistrationBody, User
 from lib.auth import generateAccessToken, getPasswordHash, getEmailFromToken
 
 router = APIRouter()
@@ -17,12 +17,10 @@ async def create_user(body: RegistrationBody):
         raise HTTPException(409, "This email is already taken")
 
 @router.post("/login")
-async def login(body: dict):
+async def login(body: LoginRequest):
 
-    email = body["user"]["email"]
-    password = body["user"]["password"]
-    if not email or not password:
-        raise HTTPException(422, "malformed login body")
+    email = body.user.email
+    password = body.user.password
     
     user = getUser(email)
     if not user:
