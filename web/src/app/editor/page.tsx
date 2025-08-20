@@ -42,6 +42,8 @@ function ArticleForm() {
             "Content-Type": "application/json",
           },
         });
+        const slug = (await response.json()).article.slug;
+        window.location.href = `/article/${slug}`;
       }}
     >
       <fieldset>
