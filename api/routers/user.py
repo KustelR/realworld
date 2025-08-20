@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request
 
-from utils.utils import authentificateRequest, getTokenFromRequest
+from utils.utils import getTokenFromRequest
+from utils.auth import authentificateRequest
 from schemas import UpdateUserBody, UserDatabase
 from lib.auth import getEmailFromToken
 from lib.db import authorizeUser, getUser, updateUser
@@ -13,11 +14,7 @@ router = APIRouter()
 async def get_user(req: Request):
 
     token = getTokenFromRequest(req)
-    user: UserDatabase
-    try:
-        user = authentificateRequest(req)
-    except Exception as e:
-        raise HTTPException(401, f"Authentication failed: {str(e)}")
+    user = authentificateRequest(req)
         
     result = user.model_dump()
     result["token"] = token
@@ -27,17 +24,7 @@ async def get_user(req: Request):
 
 @router.put("/")
 async def update_user(req: Request, body: UpdateUserBody):
-
-    user: UserDatabase
-    try:
-        user = authentificateRequest(req)
-    except Exception as e:
-        raise HTTPException(401, f"Authentication failed: {str(e)}")
-
-    if not user:
-        raise HTTPException(404, "User not found")
-
-
+    user = authentificateRequest(req)
 
     updated = updateUser(user.email, body.user)
     updated["token"] = getTokenFromRequest(req)

@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, Request
 
 import lib.db as db
-from utils.utils import authentificateRequest, getSlug
+from utils.auth import authentificateRequest
+from utils.utils import getSlug
 from schemas import Article, ArticlePostBody, ArticlePutBody, CommentPostBody, UserDatabase, UserPublic
 
 router = APIRouter()
@@ -11,12 +12,7 @@ router = APIRouter()
 @router.get("/feed")
 async def read_feed(req: Request):
 
-
-    user: UserDatabase
-    try:
-        user = authentificateRequest(req)
-    except Exception as e:
-        raise HTTPException(401, f"Authentication failed: {str(e)}")
+    user = authentificateRequest(req)
 
     articles = db.readArticles(None, user.email)
     return {
@@ -31,7 +27,7 @@ async def read_articles(req: Request, author: str = None, favorited: str = None,
     user: UserDatabase | None
     try:
         user = authentificateRequest(req)
-    except Exception as e:
+    except HTTPException:
         user = None
 
     query: dict[str, any] = {"deleted": False}
@@ -58,16 +54,15 @@ async def read_articles(req: Request, author: str = None, favorited: str = None,
 async def create_article(body: ArticlePostBody, req: Request):
     article = body.article.model_dump()
 
-    user: UserDatabase
-    try:
-        user = authentificateRequest(req)
-    except Exception as e:
-        raise HTTPException(401, f"Authentication failed: {str(e)}")
+    user = authentificateRequest(req)
     
     article["author"] = user
     article["slug"] = getSlug(article["title"])
 
-    created = db.createArticle(article, user)
+    try:
+        created = db.createArticle(article, user)
+    except db.NameTakenException as e:
+        raise HTTPException(409, "Article name is already taken")
 
     return {
         "article": created
@@ -100,12 +95,9 @@ async def delete_article(slug: str):
 
 @router.post("/{slug}/favorite")
 async def favorite_article(slug: str, req: Request):
-    
-    user: UserDatabase
-    try:
-        user = authentificateRequest(req)
-    except Exception as e:
-        raise HTTPException(401, f"Authentication failed: {str(e)}")
+
+    user = authentificateRequest(req)
+
     
     isFavorited = db.isFavorite(user.email, slug)
     if isFavorited:
@@ -121,11 +113,7 @@ async def favorite_article(slug: str, req: Request):
 @router.delete("/{slug}/favorite")
 async def unfavorite_article(slug: str, req: Request):
 
-    user: UserDatabase
-    try:
-        user = authentificateRequest(req)
-    except Exception as e:
-        raise HTTPException(401, f"Authentication failed: {str(e)}")
+    user = authentificateRequest(req)
     
     isFavorited = db.isFavorite(user.email, slug)
     if not isFavorited:
@@ -148,12 +136,8 @@ async def read_comments(slug: str):
 
 @router.post("/{slug}/comments")
 async def create_comment(slug: str, body: CommentPostBody, req: Request):
-    
-    user: UserDatabase
-    try:
-        user = authentificateRequest(req)
-    except Exception as e:
-        raise HTTPException(401, f"Authentication failed: {str(e)}")
+
+    user = authentificateRequest(req)
 
     comment = db.createComment(slug, body.comment.body, user.email)
     return {

@@ -2,9 +2,19 @@ import os
 import uuid
 import pymongo
 
+from utils.utils import isUnique
 from utils.timestamp import timestamp
 from lib.auth import generateAccessToken, getPasswordHash, verifyPassword
 from schemas import Article, Comment, CommentDatabase, CommentPublic, DatabaseArticle, UpdateUser, User, UserDatabase
+
+
+class DatabaseException(Exception):
+    pass
+
+
+class NameTakenException(DatabaseException):
+    pass
+
 
 
 MONGODB_CONNECTION = os.environ.get("MONGODB_CONNECTION")
@@ -12,19 +22,23 @@ if not MONGODB_CONNECTION:
     raise Exception("Specify mongodb connection string through `MONGODB_CONNECTION` environment variable")
 
 
-
-
-client = pymongo.MongoClient(os.getenv("MONGODB_CONNECTION"))
 exclude = {"_id": 0, "deleted": 0}
-db = client["realworld"]
-articlesCollection = db["articles"]
-passwordsCollection = db["passwords"]
-usersCollection = db["users"]
-followCollection = db["follows"]
-favoritesCollection = db["favorites"]
-commentsCollection = db["comments"]
 
-print("Connected to MongoDB")
+
+try:
+    client = pymongo.MongoClient(os.getenv("MONGODB_CONNECTION"))
+    db = client["realworld"]
+    articlesCollection = db["articles"]
+    passwordsCollection = db["passwords"]
+    usersCollection = db["users"]
+    followCollection = db["follows"]
+    favoritesCollection = db["favorites"]
+    commentsCollection = db["comments"]
+    db.command("ping", check=True)
+
+    print("Connected to MongoDB")
+except Exception as e:
+    raise Exception(f"Failed to connect to MongoDB: {e}")
 
 
 def readArticles(query: dict[str, any] | None = None, whoAsked: str | None = None) -> list[dict[str, any]]:
@@ -60,6 +74,11 @@ def readArticle(slug: str, whoAsked: str | None = None) -> dict[str, any] | None
 
 
 def createArticle(raw: dict[str, any], author: UserDatabase):
+    isNameUnique = isUnique(articlesCollection, {"slug": raw["slug"]})
+
+    if not isNameUnique:
+        raise NameTakenException("Article name already taken")
+
     raw["createdAt"] = raw["updatedAt"] = timestamp()
     article = DatabaseArticle.model_validate(raw)
     
