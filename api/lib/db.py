@@ -147,6 +147,8 @@ def updateUser(email: str, user: UpdateUser):
 
 def getProfile(username: str, whoAsked: str | None = None) -> dict[str, any] | None:
     user = usersCollection.find_one({"username": username}, exclude)
+    if not user:
+        raise DatabaseException("User not found")
     del(user["email"])
     if whoAsked:
         user["following"] = isFollowing(whoAsked, user["username"])
