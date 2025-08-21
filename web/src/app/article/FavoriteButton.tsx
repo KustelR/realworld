@@ -21,7 +21,8 @@ export default function FavoriteButton(props: {
       }}
     >
       <i className="ion-heart"></i>
-      &nbsp; Favorite Post <span className="counter">{favoritesNumber}</span>
+      &nbsp; {`${isFavorited ? "Favorite" : "Unfavorite"} Post`}{" "}
+      <span className="counter">{favoritesNumber}</span>
     </button>
   );
 }
