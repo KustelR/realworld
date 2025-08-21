@@ -11,17 +11,20 @@ async function getMyArticles(): Promise<Article[]> {
   const articles = await (
     await fetchServer(`/articles?author=${user.username}`)
   ).json();
-  console.log(articles, user);
   return articles.articles;
 }
 
-async function getUser() {
-  return (await (await fetchServer("/user")).json()).user;
+async function getProfile() {
+  const username = ((await (await fetchServer("/user")).json()).user as User)
+    .username;
+  const profileData = await fetchServer(`/profiles/${username}`);
+  const deserialized = await profileData.json();
+  return deserialized.profile as User;
 }
 
 export default async function Page() {
   const articles = await getMyArticles();
-  const user = await getUser();
+  const user = await getProfile();
   return (
     <div className="profile-page">
       <div className="user-info">
@@ -89,10 +92,10 @@ function Pagination() {
   );
 }
 
-function Controls({ user }: { user: { username: string } }) {
+function Controls({ user }: { user: User }) {
   return (
     <>
-      <FollowButton target={user.username} />
+      <FollowButton user={user} />
       <button className="btn btn-sm btn-outline-secondary action-btn">
         <i className="ion-gear-a"></i>
         &nbsp; Edit Profile Settings
