@@ -1,4 +1,3 @@
-import { ArticlePreviewProps } from "@/components/ArticlePreview/ArticlePreview";
 import TagList from "@/components/TagList";
 import { usernameToPath } from "@/lib/utils/usernameToPath";
 import Link from "next/link";
