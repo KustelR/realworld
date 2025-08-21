@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import TagList from "../TagList";
 import FavoriteButton from "./FavoriteButton";
+import formatTime from "@/lib/utils/formatTime";
 
 export type User = {
   username: string;
@@ -63,7 +64,7 @@ function ArticleMeta(props: {
         <a href={`/profile/${author.username}`} className="author">
           {author.username}
         </a>
-        <span className="date">{date}</span>
+        <span className="date">{formatTime(date)}</span>
       </div>
       <FavoriteButton
         slug={slug}

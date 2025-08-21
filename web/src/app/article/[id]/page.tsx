@@ -7,6 +7,7 @@ import fetchFromAPI from "@/lib/req/fetchServer";
 import FavoriteButton from "../FavoriteButton";
 import ControlsAuthorized from "./ControlsAuthorized";
 import FollowButton from "@/components/FollowButton";
+import formatTime from "@/lib/utils/formatTime";
 
 type ArticleItem = { type: "p" | "h2"; content: string };
 
@@ -74,7 +75,7 @@ function Banner(props: { article: Article; user: User }) {
             >
               {article.author.username}
             </Link>
-            <span className="date">{article.createdAt}</span>
+            <span className="date">{formatTime(article.createdAt)}</span>
           </div>
           <FollowButton target={author.username} />
           &nbsp;
