@@ -46,6 +46,7 @@ function UpdateForm() {
         </fieldset>
         <fieldset className="form-group">
           <input
+            autoComplete="off"
             className="form-control form-control-lg"
             type="text"
             placeholder="Email"
@@ -53,6 +54,7 @@ function UpdateForm() {
         </fieldset>
         <fieldset className="form-group">
           <input
+            autoComplete="new-password"
             className="form-control form-control-lg"
             type="password"
             placeholder="New Password"
