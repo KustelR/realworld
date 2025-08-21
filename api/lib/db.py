@@ -67,6 +67,8 @@ def readArticle(slug: str, whoAsked: str | None = None) -> dict[str, any] | None
     
     entry["favoritesCount"] = favorites
     if whoAsked:
+        user = getUser(whoAsked);
+        entry["author"]["following"] = isFollowing(user["username"], entry["author"]["username"])
         entry["favorited"] = isFavorite(whoAsked, slug)
     else:
         entry["favorited"] = False
