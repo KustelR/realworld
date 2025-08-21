@@ -9,6 +9,7 @@ export default function ControlsAuthorized(props: { slug: string }) {
       <button className="btn btn-sm btn-outline-secondary">
         <i className="ion-edit"></i> Edit Article
       </button>
+      &nbsp;
       <button
         className="btn btn-sm btn-outline-danger"
         onClick={async () => {
