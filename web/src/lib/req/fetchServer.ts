@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 export default async function fetchFromAPIWithAuth(
   endpoint: string,
   init?: RequestInit,
-): Promise<any> {
+): Promise<Response> {
   if (!process.env.NEXT_PUBLIC_API_URL) {
     throw new Error(
       "NEXT_PUBLIC_API_URL is not defined in the environment variables.",
