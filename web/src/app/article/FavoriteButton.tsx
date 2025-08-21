@@ -1,28 +1,28 @@
 "use client";
 
+import fetchClient from "@/lib/req/fetchClient";
 import favoriteAction from "@/lib/utils/favoriteSwitch";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function FavoriteButton(props: {
   slug: string;
-  favorited: boolean;
   favoritesCount: number;
+  favorited: boolean;
 }) {
-  const { slug, favorited, favoritesCount } = props;
-  const [favoritesNumber, setFavoritesNumber] = useState(favoritesCount);
-  const [isFavorited, setIsFavorited] = useState(favorited);
+  const { slug, favoritesCount, favorited } = props;
+  const router = useRouter();
   return (
     <button
-      className={`btn btn-sm btn-outline-primary ${isFavorited ? "active" : ""}`}
+      className={`btn btn-sm btn-outline-primary ${favorited ? "active" : ""}`}
       onClick={async () => {
-        const data = await favoriteAction(isFavorited, slug);
-        setFavoritesNumber(data.favoritesCount);
-        setIsFavorited(data.favorited ?? false);
+        await favoriteAction(favorited, slug);
+        router.refresh();
       }}
     >
       <i className="ion-heart"></i>
-      &nbsp; {`${isFavorited ? "Favorite" : "Unfavorite"} Post`}{" "}
-      <span className="counter">{favoritesNumber}</span>
+      &nbsp; {`${favorited ? "Unavorite" : "Favorite"} Post`}{" "}
+      <span className="counter">{favoritesCount}</span>
     </button>
   );
 }
