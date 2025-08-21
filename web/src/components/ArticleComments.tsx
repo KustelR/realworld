@@ -1,62 +1,47 @@
+import fetchServer from "@/lib/req/fetchServer";
+import formatTime from "@/lib/utils/formatTime";
 import { usernameToPath } from "@/lib/utils/usernameToPath";
 import Image from "next/image";
 import Link from "next/link";
+import CommentEditor from "./CommentEditor";
 
-export default function ArticleComments() {
+interface Comment {
+  id: string;
+  author: User;
+  body: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+async function getComments(slug: string) {
+  const data = await fetchServer(`/articles/${slug}/comments`);
+  const deserialized = await data.json();
+  return deserialized.comments as Comment[];
+}
+
+export default async function ArticleComments(props: { slug: string }) {
+  const { slug } = props;
+  const comments = await getComments(slug);
   return (
     <div className="row">
       <div className="col-xs-12 col-md-8 offset-md-2">
-        <form className="card comment-form">
-          <div className="card-block">
-            <textarea
-              className="form-control"
-              placeholder="Write a comment..."
-              rows={3}
-            ></textarea>
-          </div>
-          <div className="card-footer">
-            <img
-              src="http://i.imgur.com/Qr71crq.jpg"
-              className="comment-author-img"
-            />
-            <button className="btn btn-sm btn-primary">Post Comment</button>
-          </div>
-        </form>
-        <Comment
-          author={{
-            username: "Jacob Schmidt",
-            profilePicture: "http://i.imgur.com/Qr71crq.jpg",
-          }}
-          content="This is a great article!"
-        />
-        <Comment
-          author={{
-            username: "Jane Doe",
-            profilePicture: "http://i.imgur.com/Qr71crq.jpg",
-          }}
-          content="Thanks for sharing!"
-        />
+        <CommentEditor slug={slug} />
+        <ul>
+          {comments.map((comment) => (
+            <Comment key={comment.id} {...comment} />
+          ))}
+        </ul>
       </div>
     </div>
   );
 }
 
-interface CommentAuthor {
-  username: string;
-  profilePicture: string;
-}
-
-interface CommentData {
-  author: CommentAuthor;
-  content: string;
-}
-
-function Comment(props: CommentData) {
-  const { author, content } = props;
+function Comment(props: Comment) {
+  const { author, body, createdAt } = props;
   return (
     <div className="card">
       <div className="card-block">
-        <p className="card-text">{content}</p>
+        <p className="card-text">{body}</p>
       </div>
       <div className="card-footer">
         <Link
@@ -64,7 +49,7 @@ function Comment(props: CommentData) {
           className="comment-author"
         >
           <Image
-            src={author.profilePicture}
+            src={author.image}
             className="comment-author-img"
             width={64}
             height={64}
@@ -75,7 +60,7 @@ function Comment(props: CommentData) {
         <Link href="/profile/jacob-schmidt" className="comment-author">
           {author.username}
         </Link>
-        <span className="date-posted">Dec 29th</span>
+        <span className="date-posted">{formatTime(createdAt)}</span>
         <span className="mod-options">
           <i className="ion-trash-a"></i>
         </span>
