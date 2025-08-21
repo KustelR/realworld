@@ -2,22 +2,19 @@
 
 import fetchClient from "@/lib/req/fetchClient";
 import { FetchEventResult } from "next/dist/server/web/types";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function FollowButton(props: { target: string }) {
-  const { target } = props;
-  const [user, setUser] = useState<User | undefined>();
-  useEffect(() => {
-    getProfile(target).then((u) => {
-      setUser(u);
-    });
-  }, []);
-  if (!user) return;
+export default function FollowButton(props: { user: User }) {
+  const { user } = props;
+  const router = useRouter();
+
   return (
     <button
       className={`btn btn-sm btn-outline-secondary action-btn ${user.following ? "active" : ""}`}
       onClick={async () => {
-        setUser(await switchFollow(target, user.following ?? false));
+        await switchFollow(user.username, user.following ?? false);
+        router.refresh();
       }}
     >
       <i className="ion-plus-round"></i>

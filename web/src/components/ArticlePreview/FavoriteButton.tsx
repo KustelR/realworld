@@ -12,9 +12,7 @@ export default function FavoriteButton(props: {
   const { slug, favoritesNumber, favorited } = props;
   const [favoritesCount, setFavoritesCount] = useState(favoritesNumber);
   const [isFavorited, setIsFavorited] = useState(favorited);
-  useEffect(() => {
-    console.log(favorited);
-  }, [favorited]);
+
   return (
     <button
       className={`btn btn-outline-primary btn-sm pull-xs-right ${isFavorited ? "active" : ""}`}
