@@ -7,6 +7,7 @@ import ArticleComments from "@/components/ArticleComments";
 import fetchFromAPI from "@/lib/req/fetchServer";
 import FavoriteButton from "../FavoriteButton";
 import ControlsAuthorized from "./ControlsAuthorized";
+import FollowButton from "./FollowButton";
 
 type ArticleItem = { type: "p" | "h2"; content: string };
 
@@ -76,17 +77,14 @@ function Banner(props: { article: Article; user: User }) {
             </Link>
             <span className="date">{article.createdAt}</span>
           </div>
-          <button className="btn btn-sm btn-outline-secondary">
-            <i className="ion-plus-round"></i>
-            &nbsp; Follow {article.author.username}{" "}
-            <span className="counter">(10)</span>
-          </button>
+          <FollowButton target={author.username} />
+          &nbsp;
           <FavoriteButton
             slug={article.slug}
             favorited={article.favorited ?? false}
             favoritesCount={article.favoritesCount}
           />
-          &nbsp;&nbsp;
+          &nbsp;
           {author.username == user.username && (
             <ControlsAuthorized slug={article.slug} />
           )}
@@ -120,16 +118,15 @@ function ArticleActions(props: { article: Article; user: User }) {
           </Link>
           <span className="date">{article.createdAt}</span>
         </div>
-        <button className="btn btn-sm btn-outline-secondary">
-          <i className="ion-plus-round"></i>
-          &nbsp; Follow {article.author.username}
-        </button>
+        &nbsp;
+        <FollowButton target={article.author.username} />
         &nbsp;
         <FavoriteButton
           slug={article.slug}
           favorited={article.favorited ?? false}
           favoritesCount={article.favoritesCount}
         />
+        &nbsp;
         {article.author.username == user.username && (
           <ControlsAuthorized slug={article.slug} />
         )}
