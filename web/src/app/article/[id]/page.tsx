@@ -7,7 +7,7 @@ import ArticleComments from "@/components/ArticleComments";
 import fetchFromAPI from "@/lib/req/fetchServer";
 import FavoriteButton from "../FavoriteButton";
 import ControlsAuthorized from "./ControlsAuthorized";
-import FollowButton from "./FollowButton";
+import FollowButton from "@/components/FollowButton";
 
 type ArticleItem = { type: "p" | "h2"; content: string };
 

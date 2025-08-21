@@ -2,6 +2,7 @@ import ArticlePreview, {
   ArticlePreviewProps,
 } from "@/components/ArticlePreview/ArticlePreview";
 import FeedToggle from "@/components/FeedToggle";
+import FollowButton from "@/components/FollowButton";
 import fetchServer from "@/lib/req/fetchServer";
 import Image from "next/image";
 
@@ -91,10 +92,7 @@ function Pagination() {
 function Controls({ user }: { user: { username: string } }) {
   return (
     <>
-      <button className="btn btn-sm btn-outline-secondary action-btn">
-        <i className="ion-plus-round"></i>
-        &nbsp; Follow {user.username}
-      </button>
+      <FollowButton target={user.username} />
       <button className="btn btn-sm btn-outline-secondary action-btn">
         <i className="ion-gear-a"></i>
         &nbsp; Edit Profile Settings

@@ -15,7 +15,7 @@ export default function FollowButton(props: { target: string }) {
   if (!user) return;
   return (
     <button
-      className={`btn btn-sm btn-outline-secondary ${user.following ? "active" : ""}`}
+      className={`btn btn-sm btn-outline-secondary action-btn ${user.following ? "active" : ""}`}
       onClick={async () => {
         setUser(await switchFollow(target, user.following ?? false));
       }}
