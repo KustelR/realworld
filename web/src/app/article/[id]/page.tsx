@@ -43,7 +43,7 @@ export default async function Page({
         <hr />
 
         <ArticleActions article={article} user={user} />
-        <ArticleComments />
+        <ArticleComments slug={article.slug} />
       </div>
     </div>
   );
@@ -77,7 +77,7 @@ function Banner(props: { article: Article; user: User }) {
             </Link>
             <span className="date">{formatTime(article.createdAt)}</span>
           </div>
-          <FollowButton target={author.username} />
+          <FollowButton user={author} />
           &nbsp;
           <FavoriteButton
             slug={article.slug}
@@ -119,7 +119,7 @@ function ArticleActions(props: { article: Article; user: User }) {
           <span className="date">{article.createdAt}</span>
         </div>
         &nbsp;
-        <FollowButton target={article.author.username} />
+        <FollowButton user={article.author} />
         &nbsp;
         <FavoriteButton
           slug={article.slug}
