@@ -6,25 +6,27 @@ import FollowButton from "@/components/FollowButton";
 import fetchServer from "@/lib/req/fetchServer";
 import Image from "next/image";
 
-async function getMyArticles(): Promise<Article[]> {
-  const user = (await (await fetchServer("/user")).json()).user;
+async function getMyArticles(username: string): Promise<Article[]> {
   const articles = await (
-    await fetchServer(`/articles?author=${user.username}`)
+    await fetchServer(`/articles?author=${username}`)
   ).json();
   return articles.articles;
 }
 
-async function getProfile() {
-  const username = ((await (await fetchServer("/user")).json()).user as User)
-    .username;
-  const profileData = await fetchServer(`/profiles/${username}`);
-  const deserialized = await profileData.json();
+async function getProfile(username: string) {
+  const response = await fetchServer(`/profiles/${username}`);
+  const deserialized = await response.json();
   return deserialized.profile as User;
 }
 
-export default async function Page() {
-  const articles = await getMyArticles();
-  const user = await getProfile();
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const articles = await getMyArticles(id);
+  const profile = await getProfile(id);
   return (
     <div className="profile-page">
       <div className="user-info">
@@ -32,17 +34,17 @@ export default async function Page() {
           <div className="row">
             <div className="col-xs-12 col-md-10 offset-md-1">
               <Image
-                src={user.image}
+                src={profile.image}
                 className="user-img"
                 alt="profile picture"
                 width={100}
                 height={100}
               />
-              <h4>{user.username}</h4>
-              <p>{user.bio}</p>
+              <h4>{profile.username}</h4>
+              <p>{profile.bio}</p>
             </div>
           </div>
-          <Controls user={user} />
+          <Controls user={profile} />
         </div>
       </div>
       <Articles articles={articles} />

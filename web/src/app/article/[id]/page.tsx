@@ -31,7 +31,10 @@ export default async function Page({
   const user = (await getUser()).user;
   return (
     <div className="article-page">
-      <Banner article={article} user={user} />
+      <Banner
+        article={article}
+        isMe={user && user.username == article.author.username}
+      />
       <div className="container page">
         <div className="row article-content">
           <div className="col-md-12">
@@ -42,15 +45,18 @@ export default async function Page({
 
         <hr />
 
-        <ArticleActions article={article} user={user} />
+        <ArticleActions
+          article={article}
+          isMe={user && user.username == article.author.username}
+        />
         <ArticleComments slug={article.slug} />
       </div>
     </div>
   );
 }
 
-function Banner(props: { article: Article; user: User }) {
-  const { article, user } = props;
+function Banner(props: { article: Article; isMe: boolean }) {
+  const { article, isMe } = props;
   const { author } = article;
   return (
     <div className="banner">
@@ -85,17 +91,15 @@ function Banner(props: { article: Article; user: User }) {
             favoritesCount={article.favoritesCount}
           />
           &nbsp;
-          {author.username == user.username && (
-            <ControlsAuthorized slug={article.slug} />
-          )}
+          {isMe && <ControlsAuthorized slug={article.slug} />}
         </div>
       </div>
     </div>
   );
 }
 
-function ArticleActions(props: { article: Article; user: User }) {
-  const { article, user } = props;
+function ArticleActions(props: { article: Article; isMe: boolean }) {
+  const { article, isMe } = props;
   return (
     <div className="article-actions">
       <div className="article-meta">
@@ -127,9 +131,7 @@ function ArticleActions(props: { article: Article; user: User }) {
           favoritesCount={article.favoritesCount}
         />
         &nbsp;
-        {article.author.username == user.username && (
-          <ControlsAuthorized slug={article.slug} />
-        )}
+        {isMe && <ControlsAuthorized slug={article.slug} />}
       </div>
     </div>
   );
