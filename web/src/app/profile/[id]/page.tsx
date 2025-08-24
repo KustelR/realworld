@@ -5,6 +5,7 @@ import FeedToggle from "@/components/FeedToggle";
 import FollowButton from "@/components/FollowButton";
 import fetchServer from "@/lib/req/fetchServer";
 import Image from "next/image";
+import { notFound } from "next/navigation";
 
 async function getMyArticles(username: string): Promise<Article[]> {
   const articles = await (
@@ -16,6 +17,9 @@ async function getMyArticles(username: string): Promise<Article[]> {
 async function getProfile(username: string) {
   const response = await fetchServer(`/profiles/${username}`);
   const deserialized = await response.json();
+  if (!deserialized.profile) {
+    notFound();
+  }
   return deserialized.profile as User;
 }
 
