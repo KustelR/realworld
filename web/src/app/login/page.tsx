@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRef, useState } from "react";
 
 export default function Page() {
+  const [errors, setErrors] = useState<string[]>([]);
   return (
     <div className="auth-page">
       <div className="container page">
@@ -16,13 +17,20 @@ export default function Page() {
             <p className="text-xs-center">
               <Link href="/register">Need an account?</Link>
             </p>
-            <ErrorMessages messages={["That email is already taken"]} />
+            <ErrorMessages messages={errors} />
             <LoginForm
               onSubmit={async (data) => {
-                const user = await login(data.email, data.password);
+                let user: User & AuthActionResult;
+                try {
+                  user = (await login(data.email, data.password)).user;
+                } catch (e) {
+                  if (!(e instanceof Error)) throw e;
+                  setErrors([e.message]);
+                  return;
+                }
                 if (user) {
-                  setCookie("Authorization", `Token ${user.user.token}`);
-                  window.location.href = `/profile/${user.user.username}`;
+                  setCookie("Authorization", `Token ${user.token}`);
+                  window.location.href = `/profile/${user.username}`;
                 }
               }}
             />
@@ -88,5 +96,9 @@ async function login(
     },
     body: JSON.stringify({ user: { email, password } }),
   });
+  if (!response.ok) {
+    const message = (await response.json()).detail;
+    throw new Error(message);
+  }
   return response.json();
 }

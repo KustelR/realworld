@@ -18,6 +18,7 @@ interface RegistrationResult {
 }
 
 export default function Page() {
+  const [errors, setErrors] = useState<string[]>([]);
   return (
     <div className="auth-page">
       <div className="container page">
@@ -27,7 +28,7 @@ export default function Page() {
             <p className="text-xs-center">
               <Link href="/login">Have an account?</Link>
             </p>
-            <ErrorMessages messages={["That email is already taken"]} />
+            <ErrorMessages messages={errors} />
             <AuthForm
               onSubmit={async (data) => {
                 const response = await fetchClient("/users/", {
@@ -37,10 +38,17 @@ export default function Page() {
                   },
                   body: JSON.stringify({ user: data }),
                 });
-                const result = (await response.json()) as RegistrationResult;
+                const result = await response.json();
                 if (response.ok) {
                   setCookie("Authorization", `Token ${result.user.token}`);
                   window.location.href = `/profile/${result.user.username}`;
+                } else {
+                  const errorMessage = (result.detail as string).replaceAll(
+                    `'`,
+                    `"`,
+                  );
+                  console.log(errorMessage);
+                  setErrors(JSON.parse(errorMessage));
                 }
               }}
             />

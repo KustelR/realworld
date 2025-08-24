@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from lib.db import NameTakenException, authorizeUser, createUser, getUser
+from lib.db import NameTakenException, AuthException, authorizeUser, createUser, getUser
 from schemas import AuthUser, LoginRequest, RegistrationBody, User
 from lib.auth import generateAccessToken, getPasswordHash, getEmailFromToken
 
@@ -13,8 +13,8 @@ async def create_user(body: RegistrationBody):
     user = body.user
     try:
         return createUser(user)
-    except NameTakenException as e:
-        raise HTTPException(409, "This email is already taken")
+    except Exception as e:
+        raise HTTPException(409, str(e))
 
 @router.post("/login")
 async def login(body: LoginRequest):
@@ -24,11 +24,11 @@ async def login(body: LoginRequest):
     
     user = getUser(email)
     if not user:
-        raise HTTPException(400, "bad email")
+        raise HTTPException(400, "wrong email")
     
     isPasswordCorrect = authorizeUser(email, password)
     if not isPasswordCorrect:
-        raise HTTPException(400, "bad password")
+        raise HTTPException(400, "wrong password")
     
     token = generateAccessToken(email)
 

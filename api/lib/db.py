@@ -16,6 +16,10 @@ class NameTakenException(DatabaseException):
     pass
 
 
+class AuthException(DatabaseException):
+    pass
+
+
 
 MONGODB_CONNECTION = os.environ.get("MONGODB_CONNECTION")
 if not MONGODB_CONNECTION:
@@ -100,9 +104,21 @@ def deleteArticle(slug: str):
 
 
 def createUser(user: User):
-    isNewUser = isUnique(usersCollection, {"email": user.email})
-    if not isNewUser:
-        raise NameTakenException("Email already taken")
+    exc = RegistrationExceptionInfo = []
+
+    if len(user.username) < 3:
+        exc.append("Username is too short")
+    if not validateEmail(user.email):
+        exc.append("Invalid email")
+    if not isUnique(usersCollection, {"email": user.email}):
+        exc.append("This email is already taken")
+    if not isUnique(usersCollection, {"username": user.username}):
+        exc.append("This username is already taken")
+    if len(user.password) < 8:
+        exc.append("Password is too short. Make it at least 8 characters")
+
+    if (len(exc) > 0):
+        raise AuthException(exc)
     
     hashed = getPasswordHash(user.password)
     passwordsCollection.insert_one({"email": user.email, "password": hashed})
@@ -276,3 +292,9 @@ def createComment(articleSlug: str, commentBody: str, authorEmail: str) -> dict[
 def getTags() -> list[str]:
     tags = articlesCollection.distinct("tagList")
     return sorted(tags)
+
+
+def validateEmail(email: str) -> bool:
+    if len(email) < 5:
+        return False
+    return True

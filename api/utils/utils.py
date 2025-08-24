@@ -25,4 +25,6 @@ def isUnique(collection: Collection, query: dict[str, any]) -> bool:
     :param query: The query to match documents against.
     :return: True if no documents match the query, False otherwise.
     """
-    return collection.count_documents({**query, **{"deleted": False}}) == 0
+    count = collection.count_documents({**query})
+    print(count, {**query, **{"deleted": False}})
+    return count == 0
