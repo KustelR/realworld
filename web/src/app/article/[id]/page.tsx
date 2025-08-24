@@ -4,16 +4,21 @@ import Link from "next/link";
 import Image from "next/image";
 import ArticleComments from "@/components/ArticleComments";
 import fetchFromAPI from "@/lib/req/fetchServer";
-import FavoriteButton from "../FavoriteButton";
+import FavoriteButton from "./FavoriteButton";
 import ControlsAuthorized from "./ControlsAuthorized";
 import FollowButton from "@/components/FollowButton";
 import formatTime from "@/lib/utils/formatTime";
+import { notFound } from "next/navigation";
 
 type ArticleItem = { type: "p" | "h2"; content: string };
 
 async function getArticle(slug: string): Promise<{ article: Article }> {
   const data = await fetchFromAPI(`/articles/${slug}`);
-  return await data.json();
+  const deserialized = await data.json();
+  if (!deserialized.article) {
+    notFound();
+  }
+  return deserialized;
 }
 
 async function getUser(): Promise<{ user: User }> {
