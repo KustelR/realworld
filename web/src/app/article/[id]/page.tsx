@@ -125,7 +125,7 @@ function ArticleActions(props: { article: Article; isMe: boolean }) {
           >
             {article.author.username}
           </Link>
-          <span className="date">{article.createdAt}</span>
+          <span className="date">{formatTime(article.createdAt)}</span>
         </div>
         &nbsp;
         <FollowButton user={article.author} />
