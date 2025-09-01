@@ -22,7 +22,7 @@ async def read_feed(req: Request):
 
 
 @router.get("/")
-async def read_articles(req: Request, author: str = None, favorited: str = None, tag: str = None):
+async def read_articles(req: Request, author: str = None, favorited: str = None, tag: str = None, limit: int = 20, offset: int | None = None):
 
     user: UserDatabase | None
     try:
@@ -37,8 +37,14 @@ async def read_articles(req: Request, author: str = None, favorited: str = None,
         query["tagList"] = tag
     if favorited:
         query["slug"] = {"$in": db.getFavorites(favorited)}
+    
+    pipeline = []
+    pipeline.append({"$limit": limit})
+    if offset:
+        pipeline.append({"$skip": offset})
+    pipeline.append({"$match": query})
 
-    articles = db.readArticles(query, user.email if user else None)
+    articles = db.readArticles(pipeline, user.email if user else None)
     for article in articles:
         tagList = sorted(article["tagList"], key=lambda x: 0 if x == tag else 1) if tag else article["tagList"]
         article["tagList"] = tagList

@@ -27,6 +27,7 @@ if not MONGODB_CONNECTION:
 
 
 exclude = {"_id": 0, "deleted": 0}
+unset = [{"$unset": ["_id", "deleted"]}]
 
 
 try:
@@ -45,13 +46,10 @@ except Exception as e:
     raise Exception(f"Failed to connect to MongoDB: {e}")
 
 
-def readArticles(query: dict[str, any] | None = None, whoAsked: str | None = None) -> list[dict[str, any]]:
-    if not query:
-        query = {"deleted": False}
-    else:
-        query["deleted"] = False
+def readArticles(pipeline: list[dict[str, any]]= [], whoAsked: str | None = None) -> list[dict[str, any]]:
 
-    articles: list[str, any] = list(articlesCollection.find(query, exclude))
+
+    articles = list(articlesCollection.aggregate(pipeline + unset))
     for article in articles:
         favorites = favoritesCollection.count_documents({"slug": article["slug"]})
         article["favoritesCount"] = favorites
