@@ -5,6 +5,7 @@ import FeedToggle from "@/components/FeedToggle";
 import FollowButton from "@/components/FollowButton";
 import fetchServer from "@/lib/req/fetchServer";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 async function getMyArticles(username: string): Promise<Article[]> {
@@ -104,7 +105,7 @@ function Controls({ user }: { user: User }) {
       <FollowButton user={user} />
       <button className="btn btn-sm btn-outline-secondary action-btn">
         <i className="ion-gear-a"></i>
-        &nbsp; Edit Profile Settings
+        &nbsp; <Link href="/settings">Edit profile settings</Link>
       </button>
     </>
   );
