@@ -149,7 +149,6 @@ def getUser(email: str | None = None, username: str | None = None) -> dict[str, 
         user = usersCollection.find_one({"email": email}, exclude)
     elif username:
         user = usersCollection.find_one({"username": username}, exclude)
-    print(user)
     return user
 
 
