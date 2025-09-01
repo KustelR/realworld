@@ -159,7 +159,10 @@ def updateUser(email: str, user: UpdateUser):
         passwordsCollection.update_one({"email": email}, {"$set": {"password": getPasswordHash(user.password)}})
     if user.email:
         passwordsCollection.update_one({"email": email}, {"$set": {"email": user.email}})
-    return getUser(email)
+    
+    newUser = getUser(user.email if user.email else email)
+
+    return newUser
 
 
 def getProfile(username: str, whoAsked: str | None = None) -> dict[str, any] | None:
