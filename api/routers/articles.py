@@ -39,9 +39,9 @@ async def read_articles(req: Request, author: str = None, favorited: str = None,
         query["slug"] = {"$in": db.getFavorites(favorited)}
     
     pipeline = []
-    pipeline.append({"$limit": limit})
     if offset:
         pipeline.append({"$skip": offset})
+    pipeline.append({"$limit": limit})
     pipeline.append({"$match": query})
 
     articles = db.readArticles(pipeline, user.email if user else None)
