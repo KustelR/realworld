@@ -47,7 +47,6 @@ export default function Page() {
                     `'`,
                     `"`,
                   );
-                  console.log(errorMessage);
                   setErrors(JSON.parse(errorMessage));
                 }
               }}
