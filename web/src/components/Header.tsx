@@ -52,10 +52,7 @@ function UserCorner(props: { user: User }) {
         </Link>
       </NavItem>
       <NavItem>
-        <Link
-          href={`/profile/${usernameToPath(username)}`}
-          className="ion-person"
-        >
+        <Link href={`/profile/${username}`} className="ion-person">
           <Image
             src={image ?? ""}
             className="user-pic"
