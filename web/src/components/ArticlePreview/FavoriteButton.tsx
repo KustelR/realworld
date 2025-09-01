@@ -2,6 +2,7 @@
 
 import fetchClient from "@/lib/req/fetchClient";
 import favoriteAction from "@/lib/utils/favoriteSwitch";
+import { getCookie } from "cookies-next";
 import { useEffect, useState } from "react";
 
 export default function FavoriteButton(props: {
@@ -18,6 +19,9 @@ export default function FavoriteButton(props: {
       className={`btn btn-outline-primary btn-sm pull-xs-right ${isFavorited ? "active" : ""}`}
       type="button"
       onClick={async () => {
+        if (!(await getCookie("Authorization"))) {
+          window.location.href = "/login";
+        }
         const article = await favoriteAction(isFavorited, slug);
         setFavoritesCount(article.favoritesCount);
         setIsFavorited(article.favorited ?? false);
