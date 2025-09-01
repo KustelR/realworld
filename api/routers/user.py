@@ -25,8 +25,9 @@ async def get_user(req: Request):
 @router.put("/")
 async def update_user(req: Request, body: UpdateUserBody):
     user = authentificateRequest(req)
+    token = getTokenFromRequest(req)
 
     updated = updateUser(user.email, body.user)
-    updated["token"] = getTokenFromRequest(req)
+    updated["token"] = token
     
     return {"user": updated}
