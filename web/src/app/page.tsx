@@ -1,5 +1,6 @@
 import ArticlePreview from "@/components/ArticlePreview/ArticlePreview";
 import FeedToggle from "@/components/FeedToggle";
+import Pagination from "@/components/Pagination";
 import fetchServer from "@/lib/req/fetchServer";
 import Link from "next/link";
 
@@ -46,7 +47,11 @@ export default async function Home(params: Promise<{ searchParams: any }>) {
             {articles.map((article) => (
               <ArticlePreview key={article.slug} article={article} />
             ))}
-            <Pagination offset={parseInt(offset)} last={articles.length < 20} />
+            <Pagination
+              location="/"
+              offset={parseInt(offset)}
+              last={articles.length < 20}
+            />
           </div>
           <PopularTags tags={popularTags} />
         </div>
@@ -63,40 +68,6 @@ function Banner() {
         <p>A place to share your knowledge.</p>
       </div>
     </div>
-  );
-}
-
-function Pagination(props: { offset: number; last: boolean }) {
-  const { offset, last } = props;
-  return (
-    <ul className="pagination">
-      <li className={`page-item ${offset === 0 && "active"}`}>
-        <Link className="page-link" href="/">
-          1
-        </Link>
-      </li>
-      {offset > 20 && (
-        <li className={`page-item`}>
-          <Link className="page-link" href={`/?offset=${offset - 20}`}>
-            {offset / 20}
-          </Link>
-        </li>
-      )}
-      {offset > 0 && (
-        <li className={`page-item ${offset > 0 && "active"}`}>
-          <Link className="page-link" href={`/?offset=${offset}`}>
-            {(offset + 20) / 20}
-          </Link>
-        </li>
-      )}
-      {!last && (
-        <li className="page-item">
-          <Link className="page-link" href={`/?offset=${offset + 20}`}>
-            {(offset + 40) / 20}
-          </Link>
-        </li>
-      )}
-    </ul>
   );
 }
 
