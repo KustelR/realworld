@@ -25,7 +25,7 @@ export default function Page() {
                   user = (await login(data.email, data.password)).user;
                 } catch (e) {
                   if (!(e instanceof Error)) throw e;
-                  setErrors([e.message]);
+                  setErrors(JSON.parse(e.message.replaceAll("'", `"`)));
                   return;
                 }
                 if (user) {
