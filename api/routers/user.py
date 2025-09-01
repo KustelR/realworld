@@ -4,7 +4,7 @@ from utils.utils import getTokenFromRequest
 from utils.auth import authentificateRequest
 from schemas import UpdateUserBody, UserDatabase
 from lib.auth import getEmailFromToken
-from lib.db import authorizeUser, getUser, updateUser
+from lib.db import NameTakenException, authorizeUser, getUser, updateUser
 
 
 router = APIRouter()
@@ -27,7 +27,11 @@ async def update_user(req: Request, body: UpdateUserBody):
     user = authentificateRequest(req)
     token = getTokenFromRequest(req)
 
-    updated = updateUser(user.email, body.user)
+    try:
+        updated = updateUser(user.email, body.user)
+    except NameTakenException as e:
+        raise HTTPException(409, str(e))
+
     updated["token"] = token
     
     return {"user": updated}

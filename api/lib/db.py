@@ -104,7 +104,7 @@ def deleteArticle(slug: str):
 
 
 def createUser(user: User):
-    exc = RegistrationExceptionInfo = []
+    exc = []
 
     if len(user.username) < 3:
         exc.append("Username is too short")
@@ -154,6 +154,16 @@ def getUser(email: str | None = None, username: str | None = None) -> dict[str, 
 
 def updateUser(email: str, user: UpdateUser):
     new = {k: v for k,v in user.model_dump().items() if v is not None}
+
+    exc = []
+    if not isUnique(usersCollection, {"email": user.email}):
+        exc.append("This email is already taken")
+    if not isUnique(usersCollection, {"username": user.username}):
+        exc.append("This username is already taken")
+
+    if len(exc) > 0:
+        raise NameTakenException(exc)
+
     usersCollection.update_one({"email": email}, {"$set": new})
     if (user.password):
         passwordsCollection.update_one({"email": email}, {"$set": {"password": getPasswordHash(user.password)}})
