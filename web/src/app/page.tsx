@@ -25,8 +25,8 @@ async function getPopularTags(): Promise<string[]> {
 
 export default async function Home(params: Promise<{ searchParams: any }>) {
   const { searchParams } = await params;
-  const limit: string = (await searchParams.limit) ?? 0;
-  const offset: string = (await searchParams.offset) ?? 0;
+  const limit: string = (await (await searchParams).limit) ?? 0;
+  const offset: string = (await (await searchParams).offset) ?? 0;
   const articles = (await getArticles(parseInt(limit), parseInt(offset)))
     .articles;
   const popularTags = await getPopularTags();
