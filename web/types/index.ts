@@ -21,3 +21,7 @@ interface User {
 interface AuthActionResult {
   token: string;
 }
+
+interface FailedRequestBody {
+  detail: string;
+}
