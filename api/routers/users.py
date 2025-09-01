@@ -24,11 +24,11 @@ async def login(body: LoginRequest):
     
     user = getUser(email)
     if not user:
-        raise HTTPException(400, "wrong email")
+        raise HTTPException(400, str(["wrong email"]))
     
     isPasswordCorrect = authorizeUser(email, password)
     if not isPasswordCorrect:
-        raise HTTPException(400, "wrong password")
+        raise HTTPException(400, str("wrong password"))
     
     token = generateAccessToken(email)
 
