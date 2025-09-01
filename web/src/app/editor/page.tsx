@@ -5,13 +5,14 @@ import fetchAuthClient from "@/lib/req/fetchClient";
 import { useState } from "react";
 
 export default function Page() {
+  const [errors, setErrors] = useState<string[]>([]);
   return (
     <div className="editor-page">
       <div className="container page">
         <div className="row">
           <div className="col-md-10 offset-md-1 col-xs-12">
-            <ErrorMessages messages={["That title is required"]} />
-            <ArticleForm />
+            <ErrorMessages messages={errors} />
+            <ArticleForm setErrors={setErrors} />
           </div>
         </div>
       </div>
@@ -19,7 +20,8 @@ export default function Page() {
   );
 }
 
-function ArticleForm() {
+function ArticleForm(props: { setErrors: (errors: string[]) => void }) {
+  const { setErrors } = props;
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [body, setBody] = useState("");
@@ -28,6 +30,10 @@ function ArticleForm() {
     <form
       onSubmit={async (e) => {
         e.preventDefault();
+        if (!title) {
+          setErrors(["Title is required"]);
+          return;
+        }
         const response = await fetchAuthClient("/articles", {
           method: "POST",
           body: JSON.stringify({
@@ -42,8 +48,13 @@ function ArticleForm() {
             "Content-Type": "application/json",
           },
         });
-        const slug = (await response.json()).article.slug;
-        window.location.href = `/article/${slug}`;
+        if (response.ok) {
+          const slug = (await response.json()).article.slug;
+          window.location.href = `/article/${slug}`;
+        } else {
+          const detail = (await response.json()).detail;
+          setErrors([detail]);
+        }
       }}
     >
       <fieldset>
