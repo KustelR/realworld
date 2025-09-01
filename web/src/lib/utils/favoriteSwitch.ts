@@ -4,7 +4,7 @@ export default async function favoriteAction(
   favorited: boolean,
   slug: string,
 ): Promise<Article> {
-  let data: any;
+  let data: Response;
   if (favorited) {
     data = await fetchClient(`/articles/${slug}/favorite`, {
       method: "DELETE",
@@ -14,7 +14,14 @@ export default async function favoriteAction(
       method: "POST",
     });
   }
-  return await (
-    await data.json()
-  ).article;
+  if (data.ok) {
+    return await (
+      await data.json()
+    ).article;
+  } else {
+    const failed = await data.json();
+    throw Error(
+      `Failed to favorite/unfavorite article, details: ${failed.detail}`,
+    );
+  }
 }
