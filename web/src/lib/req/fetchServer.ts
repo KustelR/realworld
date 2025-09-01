@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 export default async function fetchFromAPIWithAuth(
   endpoint: string,
   init?: RequestInit,
+  searchParams: { [key: string]: string } = {},
 ): Promise<Response> {
   if (!process.env.NEXT_PUBLIC_API_URL) {
     throw new Error(
@@ -15,7 +16,12 @@ export default async function fetchFromAPIWithAuth(
   const headers: { Authorization?: string } = {};
   if (auth) headers.Authorization = auth.value;
 
-  return await fetch(`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, {
+  const target = new URL(endpoint, process.env.NEXT_PUBLIC_API_URL);
+  Object.entries(searchParams).forEach(([key, value]) => {
+    target.searchParams.append(key, value);
+  });
+
+  return await fetch(target, {
     ...init,
     headers: { ...init?.headers, ...headers },
   });
