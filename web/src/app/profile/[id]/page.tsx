@@ -3,17 +3,11 @@ import ArticlePreview, {
 } from "@/components/ArticlePreview/ArticlePreview";
 import FeedToggle from "@/components/FeedToggle";
 import FollowButton from "@/components/FollowButton";
+import ProfileArticles from "@/components/ProfileArticles";
 import fetchServer from "@/lib/req/fetchServer";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
-async function getMyArticles(username: string): Promise<Article[]> {
-  const articles = await (
-    await fetchServer(`/articles?author=${username}`)
-  ).json();
-  return articles.articles;
-}
 
 async function getProfile(username: string) {
   const response = await fetchServer(`/profiles/${username}`);
@@ -30,7 +24,6 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const articles = await getMyArticles(id);
   const profile = await getProfile(id);
   return (
     <div className="profile-page">
@@ -52,50 +45,8 @@ export default async function Page({
           <Controls user={profile} />
         </div>
       </div>
-      <Articles articles={articles} />
+      <ProfileArticles author={profile.username} />
     </div>
-  );
-}
-
-function Articles(props: { articles: Article[] }) {
-  const { articles } = props;
-  return (
-    <div className="container">
-      <div className="row">
-        <div className="col-xs-12 col-md-10 offset-md-1">
-          <FeedToggle
-            items={[
-              { name: "My Articles", href: "" },
-              { name: "Favorited Articles", href: "" },
-            ]}
-            active={0}
-          />
-
-          {articles.map((article) => (
-            <ArticlePreview key={article.slug} article={article} />
-          ))}
-
-          <Pagination />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function Pagination() {
-  return (
-    <ul className="pagination">
-      <li className="page-item active">
-        <a className="page-link" href="">
-          1
-        </a>
-      </li>
-      <li className="page-item">
-        <a className="page-link" href="">
-          2
-        </a>
-      </li>
-    </ul>
   );
 }
 
