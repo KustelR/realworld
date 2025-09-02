@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Request
 
+from utils.sortPipelines import getAuthorPipeline
 import lib.db as db
 from utils.auth import authentificateRequest
 from utils.utils import getSlug
@@ -10,11 +11,20 @@ router = APIRouter()
 
 
 @router.get("/feed")
-async def read_feed(req: Request):
+async def read_feed(req: Request, offset: int | None = None, limit: int = 20):
 
     user = authentificateRequest(req)
 
-    articles = db.readArticles(None, user.email)
+    followed = db.getFollowed(user.username)
+    
+    pipeline = []
+    pipeline += getAuthorPipeline(followed)
+
+    if offset:
+        pipeline.append({"$skip": offset})
+    pipeline.append({"$limit": limit})
+
+    articles = db.readArticles(pipeline, user.email)
     return {
         "articles": articles,
         "articlesCount": len(articles)
