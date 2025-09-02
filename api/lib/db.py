@@ -47,6 +47,8 @@ except Exception as e:
 
 
 def readArticles(pipeline: list[dict[str, any]]= [], whoAsked: str | None = None) -> list[dict[str, any]]:
+    if not pipeline:
+        pipeline = []
 
 
     articles = list(articlesCollection.aggregate(pipeline + unset))
@@ -205,6 +207,17 @@ def unfollowUser(follower: str, following: str) -> dict[str, any]:
     followCollection.delete_one({"follower": followerId, "following": followingId})
     return getProfile(following, follower)
 
+
+def getFollowed(follower: str) -> list[str]:
+    followerId = usersCollection.find_one({"username": follower}, {"_id": 1})
+    ids = []
+    usernames = []
+    for entry in followCollection.aggregate([{"$match": {"follower": followerId}}]):
+        ids.append(entry["following"]["_id"])
+    for entry in usersCollection.find({"_id": {"$in": list(ids)}}, {"username": 1, "_id": 0}):
+        usernames.append(entry["username"])
+
+    return usernames
 
 def isFavorite(email: str, slug: str) -> bool:
 
