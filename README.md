@@ -15,7 +15,8 @@ For more information on how to this works with other frontends/backends, head ov
 
 # How it works
 
-> Describe the general architecture of your app here
+Frontend done with Next.js, using SSR for front page, articles and if possible in other places
+Backend runs on FastAPI and MongoDB
 
 # Getting started
 
