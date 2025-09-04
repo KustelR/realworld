@@ -265,9 +265,10 @@ def unfavoriteArticle(email: str, slug: str) -> dict[str, any]:
 
 def getFavorites(username: str) -> list[str]:
     user = getUser(username=username)
-    uid = usersCollection.find_one({"email": user["email"]}, {"_id": 1})["_id"]
-    if not uid:
+    if not user:
         raise Exception("User not found")
+    
+    uid = usersCollection.find_one({"email": user["email"]}, {"_id": 1})["_id"]
     favorites = favoritesCollection.find({"u_id": uid}, {"slug": 1, "_id": 0})
     return [f["slug"] for f in favorites]
 
