@@ -1,5 +1,5 @@
 from datetime import datetime
 
 
-def timestamp() -> str:
-    return datetime.now().astimezone().isoformat() 
+def timestamp(date: datetime) -> str:
+    return date.astimezone().isoformat()

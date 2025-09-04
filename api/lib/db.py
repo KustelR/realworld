@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import uuid
 import pymongo
@@ -55,6 +56,8 @@ def readArticles(pipeline: list[dict[str, any]]= [], whoAsked: str | None = None
     for article in articles:
         favorites = favoritesCollection.count_documents({"slug": article["slug"]})
         article["favoritesCount"] = favorites
+        article["createdAt"] = timestamp(article["createdAt"])
+        article["updatedAt"] = timestamp(article["updatedAt"])
 
         if whoAsked:
             article["favorited"] = isFavorite(whoAsked, article["slug"])
@@ -70,6 +73,8 @@ def readArticle(slug: str, whoAsked: str | None = None) -> dict[str, any] | None
         return None
     
     entry["favoritesCount"] = favorites
+    entry["createdAt"] = timestamp(entry["createdAt"])
+    entry["updatedAt"] = timestamp(entry["updatedAt"])
     if whoAsked:
         user = getUser(whoAsked);
         entry["author"]["following"] = isFollowing(user["username"], entry["author"]["username"])
@@ -85,7 +90,7 @@ def createArticle(raw: dict[str, any], author: UserDatabase):
     if not isNameUnique:
         raise NameTakenException("Article name already taken")
 
-    raw["createdAt"] = raw["updatedAt"] = timestamp()
+    raw["createdAt"] = raw["updatedAt"] = datetime.now() 
     article = DatabaseArticle.model_validate(raw)
     
     articlesCollection.insert_one(article.model_dump())
@@ -94,6 +99,7 @@ def createArticle(raw: dict[str, any], author: UserDatabase):
 
 def updateArticle(slug: str, article: Article):
     new = {k: v for k,v in article.model_dump().items() if v is not None}
+    new.updatedAt = datetime.now()
     articlesCollection.update_one({"slug": slug}, {"$set": new})
     result = readArticle(slug)
     return result
@@ -276,8 +282,8 @@ def readComment(id: str) -> CommentPublic | None:
 
     commentPublic = {
         "id": comment["id"],
-        "createdAt": comment["createdAt"],
-        "updatedAt": comment["updatedAt"],
+        "createdAt": timestamp(comment["createdAt"]),
+        "updatedAt": timestamp(comment["updatedAt"]),
         "body": comment["body"],
         "author": getUser(email=authorEmail)
     }
@@ -289,6 +295,8 @@ def readComment(id: str) -> CommentPublic | None:
 def readComments(articleSlug: str) -> list[CommentPublic]:
     comments = commentsCollection.find({"articleSlug": articleSlug}, exclude)
     comments = [{**comment, "author": getUser(email=comment["authorEmail"])} for comment in comments]
+    comments = [{**comment, "createdAt": timestamp(comment["createdAt"])} for comment in comments]
+    comments = [{**comment, "updatedAt": timestamp(comment["updatedAt"])} for comment in comments]
     return [CommentPublic.model_validate(c) for c in comments]
 
 
@@ -303,8 +311,8 @@ def createComment(articleSlug: str, commentBody: str, authorEmail: str) -> dict[
         "articleSlug": articleSlug,
         "authorEmail": authorEmail,
         "body": commentBody,
-        "createdAt": timestamp(),
-        "updatedAt": timestamp()
+        "createdAt":  datetime.now(),
+        "updatedAt": datetime.now() 
     }
     comment = CommentDatabase.model_validate(raw)
 

@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel
 
 
@@ -81,6 +82,8 @@ class Article(BaseModel):
 
 class DatabaseArticle(Article):
     deleted: bool = False;
+    createdAt: datetime
+    updatedAt: datetime
 
 
 class Comment(BaseModel):
