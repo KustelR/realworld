@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Request
 
-from utils.sortPipelines import getAuthorPipeline
+from utils.sortPipelines import getAuthorNewestSortPipeline, getNewestSortPipeline
 import lib.db as db
 from utils.auth import authentificateRequest
 from utils.utils import getSlug
@@ -18,7 +18,7 @@ async def read_feed(req: Request, offset: int | None = None, limit: int = 20):
     followed = db.getFollowed(user.username)
     
     pipeline = []
-    pipeline += getAuthorPipeline(followed)
+    pipeline += getAuthorNewestSortPipeline(followed)
 
     if offset:
         pipeline.append({"$skip": offset})
@@ -45,7 +45,7 @@ async def read_articles(req: Request, author: str = None, favorited: str = None,
         query["author.username"] = author
     if tag:
         query["tagList"] = tag
-    if favorited:
+    if favorited and user:
         query["slug"] = {"$in": db.getFavorites(favorited)}
     
     pipeline = []
@@ -53,6 +53,7 @@ async def read_articles(req: Request, author: str = None, favorited: str = None,
     if offset:
         pipeline.append({"$skip": offset})
     pipeline.append({"$limit": limit})
+    pipeline += getNewestSortPipeline()
 
     articles = db.readArticles(pipeline, user.email if user else None)
     for article in articles:

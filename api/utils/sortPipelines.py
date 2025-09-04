@@ -1,45 +1,34 @@
 from dateutil import parser
 
-def getAuthorPipeline(authorList):
+def getAuthorNewestSortPipeline(authorList):
+    print("here", authorList)
     pipeline = []
-
     pipeline.append({
         "$addFields": {
-            "sortFactor": "$author.username"
-        }
+            "followed": {
+                "$cond": {
+                    "if": {"$in": ["$author.username", authorList]},
+                    "then": 1,
+                    "else": 0
+                }
+        }}
     })
     pipeline.append({
-        "$addFields": {
-            "sortPriority": {
-                "$switch": {
-                    "branches": [{
-                        "case": {
-                            "$in": ["$sortFactor", authorList]
-                        },
-                        "then": 2
-                },
-                {
-                    "case": { "not": {
-                            "$in": ["$sortFactor", authorList]
-                    }},
-                    "then": 1
-                }
-                ]}
-            }}})
-    pipeline.append({"$sort": {
-        "sortPriority": -1
-    }})
-    pipeline.append({"$unset": ["sortPriority", "sortFactor"]})
+        "$sort": {
+            "followed": -1,
+            "updatedAt": -1,
+        }
+    })
+    pipeline.append({"$unset": ["followed"]})
     return pipeline
 
 
-def newestSortPipeline():
+def getNewestSortPipeline():
     pipeline = []
 
     pipeline.append({
-        "$addField": {
-            "timestamp":
-                parser.parse()
+        "$sort": {
+            "updatedAt": -1
         }
     })
 
