@@ -2,17 +2,22 @@ import ArticlePreview from "@/components/ArticlePreview/ArticlePreview";
 import FeedToggle from "@/components/FeedToggle";
 import Pagination from "@/components/Pagination";
 import fetchServer from "@/lib/req/fetchServer";
-import Link from "next/link";
 
 async function getArticles(
   limit?: number,
   offset?: number,
+  feed: "global" | "personal" = "personal",
 ): Promise<{ articles: Article[] }> {
   const searchParams: { [key: string]: string } = {};
   if (limit) searchParams.limit = limit.toString();
   if (offset) searchParams.offset = offset.toString();
 
-  const data = await fetchServer("/articles", undefined, searchParams);
+  const data = await fetchServer(
+    `/articles/${feed === "personal" ? "feed" : ""}`,
+    undefined,
+    searchParams,
+  );
+  console.log(data);
   const articles: Article[] = (await data.json()).articles;
   return { articles };
 }
@@ -27,8 +32,10 @@ export default async function Home(params: Promise<{ searchParams: any }>) {
   const { searchParams } = await params;
   const limit: string = (await (await searchParams).limit) ?? 0;
   const offset: string = (await (await searchParams).offset) ?? 0;
-  const articles = (await getArticles(parseInt(limit), parseInt(offset)))
-    .articles;
+  const feedMode = await (await searchParams).feed;
+  const articles = (
+    await getArticles(parseInt(limit), parseInt(offset), feedMode)
+  ).articles;
   const popularTags = await getPopularTags();
   return (
     <div className="home-page">
