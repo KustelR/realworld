@@ -58,6 +58,7 @@ def readArticles(pipeline: list[dict[str, any]]= [], whoAsked: str | None = None
         article["favoritesCount"] = favorites
         article["createdAt"] = timestamp(article["createdAt"])
         article["updatedAt"] = timestamp(article["updatedAt"])
+        article["author"] = getProfile(article["author"]["username"])
 
         if whoAsked:
             article["favorited"] = isFavorite(whoAsked, article["slug"])
