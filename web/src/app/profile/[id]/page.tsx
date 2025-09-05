@@ -1,7 +1,3 @@
-import ArticlePreview, {
-  ArticlePreviewProps,
-} from "@/components/ArticlePreview/ArticlePreview";
-import FeedToggle from "@/components/FeedToggle";
 import FollowButton from "@/components/FollowButton";
 import ProfileArticles from "@/components/ProfileArticles";
 import fetchServer from "@/lib/req/fetchServer";

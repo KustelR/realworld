@@ -40,8 +40,14 @@ export default async function Home(params: Promise<{ searchParams: any }>) {
             <FeedToggle
               active={0}
               items={[
-                { name: "Your Feed", href: "" },
-                { name: "Global Feed", href: "" },
+                {
+                  name: "Your Feed",
+                  param: { name: "feed", value: "personal" },
+                },
+                {
+                  name: "Global Feed",
+                  param: { name: "feed", value: "global" },
+                },
               ]}
             />
             {articles.map((article) => (
