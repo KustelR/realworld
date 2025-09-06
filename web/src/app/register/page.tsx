@@ -6,6 +6,7 @@ import ErrorMessages from "@/components/ErrorMessages";
 import fetchClient from "@/lib/req/fetchClient";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
+import getErrorMessages from "@/lib/utils/getErrorMessages";
 
 interface RegistrationResult {
   user: {
@@ -43,11 +44,7 @@ export default function Page() {
                   setCookie("Authorization", `Token ${result.user.token}`);
                   window.location.href = `/profile/${result.user.username}`;
                 } else {
-                  const errorMessage = (result.detail as string).replaceAll(
-                    `'`,
-                    `"`,
-                  );
-                  setErrors(JSON.parse(errorMessage));
+                  setErrors(await getErrorMessages(response));
                 }
               }}
             />
