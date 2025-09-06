@@ -6,7 +6,7 @@ import fetchServer from "@/lib/req/fetchServer";
 async function getArticles(
   limit?: number,
   offset?: number,
-  feed: "global" | "personal" = "personal",
+  feed: "global" | "personal" = "global",
 ): Promise<{ articles: Article[] }> {
   const searchParams: { [key: string]: string } = {};
   if (limit) searchParams.limit = limit.toString();
@@ -17,9 +17,15 @@ async function getArticles(
     undefined,
     searchParams,
   );
-  console.log(data);
-  const articles: Article[] = (await data.json()).articles;
-  return { articles };
+  if (data.ok) {
+    const articles: Article[] = (await data.json()).articles;
+    return { articles };
+  } else {
+    console.warn(
+      `something went wrong while fetching articles: ${(await data.json()).detail}`,
+    );
+    return { articles: [] };
+  }
 }
 
 async function getPopularTags(): Promise<string[]> {
