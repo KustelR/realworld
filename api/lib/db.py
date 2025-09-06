@@ -1,12 +1,13 @@
 from datetime import datetime
 import os
 import uuid
+from bson import ObjectId
 import pymongo
 
 from utils.utils import isUnique
 from utils.timestamp import timestamp
 from lib.auth import generateAccessToken, getPasswordHash, verifyPassword
-from schemas import Article, Comment, CommentDatabase, CommentPublic, DatabaseArticle, UpdateUser, User, UserDatabase
+from schemas import Article, CommentDatabase, CommentPublic, DatabaseArticle, UpdateUser, User, UserDatabase
 
 
 class DatabaseException(Exception):
@@ -58,7 +59,7 @@ def readArticles(pipeline: list[dict[str, any]]= [], whoAsked: str | None = None
         article["favoritesCount"] = favorites
         article["createdAt"] = timestamp(article["createdAt"])
         article["updatedAt"] = timestamp(article["updatedAt"])
-        article["author"] = getProfile(article["author"]["username"])
+        article["author"] = getProfile({"_id": ObjectId(article["authorId"])})
 
         if whoAsked:
             article["favorited"] = isFavorite(whoAsked, article["slug"])
@@ -76,6 +77,7 @@ def readArticle(slug: str, whoAsked: str | None = None) -> dict[str, any] | None
     entry["favoritesCount"] = favorites
     entry["createdAt"] = timestamp(entry["createdAt"])
     entry["updatedAt"] = timestamp(entry["updatedAt"])
+    entry["author"] = getProfile({"_id": ObjectId(entry["authorId"])})
     if whoAsked:
         user = getUser(whoAsked);
         entry["author"]["following"] = isFollowing(user["username"], entry["author"]["username"])
@@ -91,7 +93,9 @@ def createArticle(raw: dict[str, any], author: UserDatabase):
     if not isNameUnique:
         raise NameTakenException("Article name already taken")
 
-    raw["createdAt"] = raw["updatedAt"] = datetime.now() 
+    raw["createdAt"] = raw["updatedAt"] = datetime.now()
+    authorId = usersCollection.find_one({"email": author.email}, {"_id": 1})["_id"]
+    raw["authorId"] = str(authorId)
     article = DatabaseArticle.model_validate(raw)
     
     articlesCollection.insert_one(article.model_dump())
@@ -182,8 +186,8 @@ def updateUser(email: str, user: UpdateUser):
     return newUser
 
 
-def getProfile(username: str, whoAsked: str | None = None) -> dict[str, any] | None:
-    user = usersCollection.find_one({"username": username}, exclude)
+def getProfile(query: dict[str, any], whoAsked: str | None = None) -> dict[str, any] | None:
+    user = usersCollection.find_one(query, exclude)
     if not user:
         return None
     del(user["email"])
@@ -204,7 +208,7 @@ def followUser(follower: str, following: str) -> dict[str, any]:
     followingId = usersCollection.find_one({"username": following}, {"_id": 1})
 
     followCollection.insert_one({"follower": followerId, "following": followingId})
-    return getProfile(following, follower)
+    return getProfile({"username": following}, follower)
 
 
 def unfollowUser(follower: str, following: str) -> dict[str, any]:
@@ -212,7 +216,7 @@ def unfollowUser(follower: str, following: str) -> dict[str, any]:
     followingId = usersCollection.find_one({"username": following}, {"_id": 1})
 
     followCollection.delete_one({"follower": followerId, "following": followingId})
-    return getProfile(following, follower)
+    return getProfile({"username": "following"}, follower)
 
 
 def getFollowed(follower: str) -> list[str]:

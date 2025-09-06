@@ -18,7 +18,7 @@ async def get_profile(username: str, req: Request):
     except Exception as e:
        user = None 
 
-    profile = getProfile(username)
+    profile = getProfile({"username": username})
     if not profile:
         raise HTTPException(404, "Profile not found")
     

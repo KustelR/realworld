@@ -4,7 +4,7 @@ from utils.sortPipelines import getAuthorNewestSortPipeline, getNewestSortPipeli
 import lib.db as db
 from utils.auth import authentificateRequest
 from utils.utils import getSlug
-from schemas import Article, ArticlePostBody, ArticlePutBody, CommentPostBody, UserDatabase, UserPublic
+from schemas import ArticlePostBody, ArticlePutBody, CommentPostBody, UserDatabase, UserPublic
 
 router = APIRouter()
 

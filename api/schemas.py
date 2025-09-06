@@ -75,15 +75,19 @@ class Article(BaseModel):
     description: str
     body: str
     tagList: list[str]
-    createdAt: str
-    updatedAt: str
-    author: UserPublic
 
 
 class DatabaseArticle(Article):
     deleted: bool = False;
     createdAt: datetime
     updatedAt: datetime
+    authorId: str
+
+
+class PublicArticle(Article):
+    author: UserPublic
+    createdAt: str
+    updatedAt: str
 
 
 class Comment(BaseModel):
