@@ -18,13 +18,5 @@ def getTokenFromRequest(req: Request) -> str:
 
 
 def isUnique(collection: Collection, query: dict[str, any]) -> bool:
-    """
-    Check if a document with the given query exists in the collection.
-    
-    :param collection: The MongoDB collection to check.
-    :param query: The query to match documents against.
-    :return: True if no documents match the query, False otherwise.
-    """
     count = collection.count_documents({**query})
-    print(count, {**query, **{"deleted": False}})
     return count == 0

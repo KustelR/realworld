@@ -3,7 +3,6 @@
 import fetchClient from "@/lib/req/fetchClient";
 import favoriteAction from "@/lib/utils/favoriteSwitch";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 export default function FavoriteButton(props: {
   slug: string;

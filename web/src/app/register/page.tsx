@@ -1,22 +1,12 @@
 "use client";
 
-import { getCookie, setCookie } from "cookies-next";
+import { setCookie } from "cookies-next";
 
 import ErrorMessages from "@/components/ErrorMessages";
 import fetchClient from "@/lib/req/fetchClient";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import getErrorMessages from "@/lib/utils/getErrorMessages";
-
-interface RegistrationResult {
-  user: {
-    email: string;
-    username: string;
-    image: string;
-    bio: string;
-    token: string;
-  };
-}
 
 export default function Page() {
   const [errors, setErrors] = useState<string[]>([]);

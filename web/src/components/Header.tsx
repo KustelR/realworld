@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import { usernameToPath } from "@/lib/utils/usernameToPath";
 import fetchAuth from "@/lib/req/fetchServer";
 
 async function getUser(): Promise<User | undefined> {

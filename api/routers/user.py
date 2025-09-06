@@ -2,9 +2,8 @@ from fastapi import APIRouter, HTTPException, Request
 
 from utils.utils import getTokenFromRequest
 from utils.auth import authentificateRequest
-from schemas import UpdateUserBody, UserDatabase
-from lib.auth import getEmailFromToken
-from lib.db import NameTakenException, authorizeUser, getUser, updateUser
+from schemas import UpdateUserBody
+from lib.db import NameTakenException, updateUser
 
 
 router = APIRouter()

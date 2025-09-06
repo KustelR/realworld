@@ -1,9 +1,7 @@
 "use client";
 
 import fetchClient from "@/lib/req/fetchClient";
-import { FetchEventResult } from "next/dist/server/web/types";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 export default function FollowButton(props: { user: User }) {
   const { user } = props;
@@ -21,13 +19,6 @@ export default function FollowButton(props: { user: User }) {
       &nbsp; {user.following ? "Unfollow" : "Follow"} {user.username}{" "}
     </button>
   );
-}
-
-async function getProfile(target: string): Promise<User | undefined> {
-  const data = await fetchClient(`/profiles/${target}`);
-  const deserialized = await data.json();
-
-  return deserialized.profile;
 }
 
 async function switchFollow(target: string, following: boolean): Promise<User> {

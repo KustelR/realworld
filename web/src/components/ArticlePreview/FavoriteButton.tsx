@@ -1,9 +1,8 @@
 "use client";
 
-import fetchClient from "@/lib/req/fetchClient";
 import favoriteAction from "@/lib/utils/favoriteSwitch";
 import { getCookie } from "cookies-next";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function FavoriteButton(props: {
   slug: string;

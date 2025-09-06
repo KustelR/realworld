@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException
 
-from lib.db import NameTakenException, AuthException, authorizeUser, createUser, getUser
-from schemas import AuthUser, LoginRequest, RegistrationBody, User
-from lib.auth import generateAccessToken, getPasswordHash, getEmailFromToken
+from lib.db import authorizeUser, createUser, getUser
+from schemas import LoginRequest, RegistrationBody
+from lib.auth import generateAccessToken
 
 router = APIRouter()
 

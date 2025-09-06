@@ -1,10 +1,9 @@
 from fastapi import APIRouter, HTTPException, Request
 
-from lib.auth import getEmailFromToken
-from schemas import User, UserDatabase
+from schemas import UserDatabase
 from utils.auth import authentificateRequest
 from lib.db import followUser, getProfile, unfollowUser
-from lib.db import getUser, isFollowing 
+from lib.db import isFollowing 
 
 
 router = APIRouter()
