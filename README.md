@@ -20,5 +20,23 @@ Backend runs on FastAPI and MongoDB
 
 # Getting started
 
-> npm install, npm start, etc.
+## Docker
+TODO: Create docker image
 
+## Front-end
+
+1. [install node and npm](https://nodejs.org/en/download)
+2. open "web" directory
+3. run ```bash npm install to install``` dependencies
+4. run ```bash npm run build``` & npm run start (```bash npm run dev``` if you want dev mode)
+5. create here .env and set ```env NEXT_PUBLIC_API_URL``` to your api url (see how to host it below)
+Now frontend run on 3000 port
+
+## Back-end
+
+1. [install mongodb](https://www.mongodb.com/docs/manual/installation/) ([docker image](https://hub.docker.com/r/mongodb/mongodb-community-server))
+2. [install fastapi](https://fastapi.tiangolo.com/#installation)
+3. open "api" directory
+4. create here .env file and set ```env MONGODB_CONNECTION_STRING``` to your mongodb connection string (like ```url mongodb://localhost:27017```)
+5. run ```bash fastapi run``` (```bash fastapi dev``` if you want dev mode)
+Now backend runs on 8000 port
