@@ -30,6 +30,7 @@ TODO: Create docker image
 3. run ```bash npm install to install``` dependencies
 4. run ```bash npm run build``` & npm run start (```bash npm run dev``` if you want dev mode)
 5. create here .env and set ```env NEXT_PUBLIC_API_URL``` to your api url (see how to host it below)
+
 Now frontend run on 3000 port
 
 ## Back-end
@@ -39,4 +40,5 @@ Now frontend run on 3000 port
 3. open "api" directory
 4. create here .env file and set ```env MONGODB_CONNECTION_STRING``` to your mongodb connection string (like ```url mongodb://localhost:27017```)
 5. run ```bash fastapi run``` (```bash fastapi dev``` if you want dev mode)
-Now backend runs on 8000 port
+6.
+7. Now backend runs on 8000 port
