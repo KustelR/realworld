@@ -40,5 +40,5 @@ Now frontend run on 3000 port
 3. open "api" directory
 4. create here .env file and set ```env MONGODB_CONNECTION_STRING``` to your mongodb connection string (like ```url mongodb://localhost:27017```)
 5. run ```bash fastapi run``` (```bash fastapi dev``` if you want dev mode)
-6.
-7. Now backend runs on 8000 port
+  
+Now backend runs on 8000 port
